@@ -1,6 +1,9 @@
+using Microsoft.Win32.SafeHandles;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace CodeTAF
@@ -11,30 +14,69 @@ namespace CodeTAF
         private bool run = false;
 
         private char[] numbers = "0123456789".ToCharArray();
+        private string[] writtenNumbers = { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
 
+
+        string[] GetWrittenNums(string data) {
+            List<string> result = new List<string>();
+            for (int i = 0; i < writtenNumbers.Length; i++) {
+                if (data.Contains(writtenNumbers[i])) {
+                    result.Add(writtenNumbers[i]);
+                }
+            }            
+            return result.ToArray();
+        }
+
+        //Completed but this is messy AF, probably due to being tired but hey it works. 
         void Main() {
-
             
             string[] lines = Input().Split("\n");
 
-            int total = 0;
-            
+            int total = 0;            
+
             foreach (string line in lines) {
-                string number = " ";
-                char latestNumber = ' ';
-                foreach (char c in line) {
-                    
-                    if (numbers.Contains<char>(c)) {
-                        if (number != " ") {
-                            latestNumber = c;
+                string number = " ";                
+                int firstIndex = 9999999;
+                int lastIndex = -1;
+                string firstNumber = " ";
+                string lastNumber = " ";
+
+
+                string[] containedNumbers = GetWrittenNums(line);
+
+                foreach (string containedNumber in containedNumbers) {   
+                    int curIndex = line.IndexOf(containedNumber);
+                    int secondIndex = line.LastIndexOf(containedNumber);                    
+
+                    if (curIndex < firstIndex) {
+                        firstIndex = curIndex;
+                        firstNumber = (Array.IndexOf(writtenNumbers, containedNumber) + 1).ToString();
+                    }
+
+                    if (secondIndex > lastIndex) {
+                        lastIndex = secondIndex;
+                        lastNumber = (Array.IndexOf(writtenNumbers, containedNumber) + 1).ToString();
+                    }              
+                }
+                
+                //print($"firstIndex = {firstIndex} with {firstNumber} lastIndex = {lastIndex} with {lastNumber}");
+
+                for (int i = 0;i < line.Length;i++) {
+                    if (numbers.Contains<char>(line[i])) {
+
+                        if (i < firstIndex) {
+                            firstIndex = i;
+                            firstNumber = line[i].ToString();
                         }
-                        else {
-                            number = c.ToString();
-                        }
+                        if (i > lastIndex) {
+                            lastIndex = i;
+                            lastNumber = line[i].ToString();
+                        }                        
                     }
                 }
-                if (latestNumber == ' ') { number += number; }
-                else { number += latestNumber; }
+               
+                if (lastNumber == " ") { number = firstNumber + firstNumber; }
+                else { number = firstNumber + lastNumber; }
                 
                 //print(number);
                 total += int.Parse(number);
@@ -55,11 +97,16 @@ namespace CodeTAF
 
 
         string InputTest() {
-            return 
-@"1abc2
-pqr3stu8vwx
-a1b2c3d4e5f
-treb7uchet";
+            return
+@"two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen
+fjuesixil
+fourbsqr7bktkbqbdlpfour";
         }
 
         string Input() {
