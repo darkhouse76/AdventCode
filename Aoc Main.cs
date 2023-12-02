@@ -8,7 +8,11 @@ namespace CodeTAF
     public class AocMain : MonoBehaviour
     {
         [SerializeField]
+        private bool useTestInput = true;
+        [SerializeField]
         private bool run = false;
+        private string input;
+
 
         void Main() {
 
@@ -21,17 +25,21 @@ namespace CodeTAF
                 run = false;
                 Debug.Log("========================================================================");
 
+                if (useTestInput) { input = InputTest(); }
+                else { input = Input(); }
                 Main();
             }
         }
 
 
         string InputTest() {
-            return "replace";
+            return 
+@"replace";
         }
 
         string Input() {
-            return "replace";
+            return 
+@"replace";
         }
 
 
