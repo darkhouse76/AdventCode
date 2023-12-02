@@ -33,19 +33,45 @@ namespace CodeTAF
             return true;
         }
 
+        int GetPower(string game) {
+            int[] dicePowers = new int[diceColors.Length];
+            int totalPower = 1;
+
+            for (int i = 0; i < diceColors.Length; i++) {
+                dicePowers[i] = 0;
+                int curIndex = game.IndexOf(diceColors[i]);
+                while (curIndex != -1) {
+                    int curDiceAmount = int.Parse(game.Substring(curIndex - 3, 2));
+                    if (curDiceAmount > dicePowers[i]) {
+                        dicePowers[i] = curDiceAmount;                        
+                    }
+                    curIndex = game.IndexOf(diceColors[i], curIndex + 1);
+                }                
+                totalPower *= dicePowers[i];
+            }
+
+            return totalPower;            
+
+        }
+
+
         void Main() {  
             
 
             string[] games = input.Split("\n");
             int total = 0;
 
-            foreach (string game in games) { 
-                
+            foreach (string game in games) {
+                /*
+                //part 1
                 if (IsPossible(game)) {
                     //print($"Game# {game.Substring(game.IndexOf(":")-1, 1)} is possible");
 
                     total += int.Parse(game.Substring(game.IndexOf(":") - 2, 2));                    
-                }             
+                } 
+                */
+
+                total += GetPower(game);
 
             }
 
