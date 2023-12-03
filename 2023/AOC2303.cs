@@ -45,9 +45,9 @@ namespace CodeTAF
         void Main() {
             string[] engine = input.Split('\n');
 
-
+            int gearTotal = 0;
             int total = 0;
-  
+            List<int> gearParts = new();
 
             for (int i = 0; i < engine.Length; i++) {
                 engine[i] = engine[i].Trim();
@@ -55,11 +55,12 @@ namespace CodeTAF
                     if (engine[i][j] != '.' && !char.IsLetterOrDigit(engine[i][j])) {
                         //found symbol
                         //print(engine[i][j]); //debug
-                        int prevNumber = 0;
-                        for (int k = -1; k < 2; k++) {
+                        int prevNumber = 0;                        
+                        gearParts.Clear();
+                        for (int k = -1; k < 2; k++) { //checking row above, at, and below the found symbol
                             string testString = engine[i + k].Substring(j - 1, 3);
 
-                            for (int l = 0; l < testString.Length; l++) {
+                            for (int l = 0; l < testString.Length; l++) { 
                                 if (char.IsDigit(testString[l]) ) {
                                     //found digit adjacent to symbol
 
@@ -67,6 +68,10 @@ namespace CodeTAF
                                     //checks if same as prevous so throw out if so *note a bit of duct tape and there are edge cases where this fails
                                     if (foundNumber != prevNumber) {
                                         //print(foundNumber); //debug
+                                        
+                                        gearParts.Add(foundNumber);
+
+
                                         total += foundNumber;
                                     }
                                     prevNumber = foundNumber;
@@ -76,13 +81,17 @@ namespace CodeTAF
                             }
                             
                         }
-                        
+
+                        if (engine[i][j] == '*' && gearParts.Count == 2) {
+                            gearTotal += (gearParts[0] * gearParts[1]);
+                        }                        
 
                     }
                 }
             }
 
             print($"Total = {total}");
+            print($"Gears Total = {gearTotal}");
 
 
         }
