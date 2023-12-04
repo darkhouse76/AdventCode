@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO.Enumeration;
+using Unity.Mathematics;
 using UnityEditor.Compilation;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
@@ -152,13 +153,25 @@ namespace CodeTAF
                     
 
             int extraTotal = 0;
+            int targetSize = 0;
+            int maxSize = 70000000;
+            int requiredSize = 30000000;
+            int curDelete = 70000000;
 
             for (int i =  0; i < fileData.Count; i++) {
 
                 if (!fileData[i].isDir) { continue; }
                 //print(fileData[i]);
 
-                int extraSize = GetSizeExtra(fileData[i].rootDir + fileData[i].name);
+                int extraSize = 0;
+                
+                if (fileData[i].name == "/") {
+                    extraSize = GetSizeExtra(fileData[i].name);
+                    targetSize = requiredSize - (maxSize - extraSize);
+                    print("root file size = " +  extraSize);
+                    print("required min for delete = " +  targetSize);
+                }
+                else { extraSize = GetSizeExtra(fileData[i].rootDir + fileData[i].name); }
 
                 //print("SIZE: " + GetSizeExtra(fileData[i].rootDir + fileData[i].name));
 
@@ -166,12 +179,14 @@ namespace CodeTAF
                     extraTotal += extraSize;
                 }  
 
-                
+                if (extraSize >= targetSize) {
+                    curDelete = math.min(curDelete, extraSize);
+                }
 
             }
             
-            print($"Extra  = {extraTotal}");            
-
+            print($"Extra  = {extraTotal}");
+            print($"Delete Size = {curDelete}");
 
         }
 
