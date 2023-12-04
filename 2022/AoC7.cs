@@ -15,6 +15,9 @@ namespace CodeTAF
         private bool run = false;
         private string input;
 
+        [SerializeField]
+        GameObject baseGameFile;
+
 
         List<(bool isDir, string rootDir, string name, int size)> fileData = new List<(bool isDir, string rootDir, string name, int size)>();
 
@@ -33,56 +36,8 @@ namespace CodeTAF
             }
 
             return totalSize;
-        }
+        }    
 
-        int GetSize(string dirName,bool getTotal = false) {
-            int totalSize = 0;
-            for (int i = 0; i < fileData.Count; i++) {
-                if (fileData[i].rootDir == dirName) {
-                    if (fileData[i].isDir && !getTotal) {
-                        continue;
-                        //fileData[i] = (fileData[i].isDir, fileData[i].rootDir, fileData[i].name, GetSize(fileData[i].name));                        
-                    }                   
-                    totalSize += fileData[i].size;                                       
-                }
-            }
-
-            return totalSize;
-        }
-
-        string GetRootDirOf(string target) {
-            for (int i = 0; i < fileData.Count; i++) {
-                if (fileData[i].name == target) {
-                    return fileData[i].rootDir;
-                }
-            }
-            return "/";
-        }
-
-        void SetDirSize(string targetDir, int targetSize) {
-            for (int i = 0; i < fileData.Count; i++) {
-                if (!fileData[i].isDir || (fileData[i].name != targetDir)) { continue; }
-
-                fileData[i] = (fileData[i].isDir, fileData[i].rootDir, fileData[i].name, targetSize);
-                return;
-            }
-        }
-
-        void InitDirSizes() {
-            List<(string nameToChange, int size)> toChange = new List<(string nameToChange, int size)>();
-
-            for (int i = 0;i < fileData.Count;i++) {
-                if (!fileData[i].isDir) { continue; }
-
-                toChange.Add((fileData[i].name, GetSize(fileData[i].name,true)));
-                
-            }
-            
-            foreach (var change in toChange) {
-                SetDirSize(change.nameToChange, change.size);
-            }
-
-        }
 
         int GetHowManyThings(string targetDir) {
             int count = 0;
@@ -94,15 +49,42 @@ namespace CodeTAF
         }
         
 
+        GameObject GetChildByName(string targetName, GameObject targetObject) {
+            Transform[] childern = targetObject.transform.GetComponentsInChildren<Transform>();
+            foreach (Transform t in childern) {
+                if (t.name == targetName) {
+                    return t.gameObject;
+                }
+            }
+            return null;
+
+        }
+
+        bool AlreadyExist(string targetName, string curDir) {
+            foreach (var data in fileData) {
+                if (data.name == targetName && data.rootDir == curDir) { 
+                    
+                    
+                    return true; }
+            }
+            return false;
+        }
+
         void Main() {
 
             
             string[] instructions = input.Split("\n");
 
+            fileData.Clear();          
 
-            string curDir = " ";
+
+            
+            
+            GameObject curGameDir = baseGameFile;
 
             fileData.Add((true, "root", "/", 0));
+
+            List<string> cdHistory = new List<string>();
 
             foreach (string instruction in instructions) {
                 string[] instructionParts = instruction.Split(" ");                
@@ -113,20 +95,27 @@ namespace CodeTAF
                         switch (instructionParts[1]) {
                             case "cd":
                                 //print("Command: Change dir");
+                                
                                 switch (instructionParts[2].Trim()) {
-                                    case "..":                                        
-                                        curDir = GetRootDirOf(curDir);
-                                        if (curDir == "root") { curDir = "/"; }
+                                    case "..":       
+                                        if (cdHistory.Count == 1) { break; }
+                                        cdHistory.RemoveAt(cdHistory.Count-1);                                        
+                                        
+                                        //else { curGameDir = curGameDir.transform.parent.gameObject; }
                                         break;
                                     case "/":
-                                        curDir = "/";
+                                        cdHistory.Clear();
+                                        cdHistory.Add("/");
+                                        
+                                        //curGameDir = baseGameFile;
                                         break;
                                     default:
-                                        curDir = curDir + instructionParts[2].Trim();
+                                        
+                                        cdHistory.Add(cdHistory[^1] + instructionParts[2].Trim());
+                                        
+                                        //curGameDir = GetChildByName(instructionParts[2].Trim(),curGameDir);
                                         break;
-                                }
-
-                                //print(curDir);
+                                }                                
                                 break;
                             case "ls":
                                 //print("Command: List Stuff");
@@ -135,75 +124,48 @@ namespace CodeTAF
                         break;
                     case 'd':
                         //print("Dir");
-                        fileData.Add((true, curDir, instructionParts[1].Trim(), 0));
+                        
+                        //need to check if it already exists. 
+                        if (!AlreadyExist(instructionParts[1].Trim(), cdHistory[^1])) {
+                            fileData.Add((true, cdHistory[^1], instructionParts[1].Trim(), 0));
+                        }
+                        
+                        //GameObject gameDir = new GameObject(instructionParts[1].Trim()); //unity debug
+                        //gameDir.transform.SetParent(curGameDir.transform);
                         break;
                     default:
                         //print("file");
-                        fileData.Add((false, curDir, instructionParts[1].Trim(), int.Parse(instructionParts[0])));
+                        
+                        if (!AlreadyExist(instructionParts[1].Trim(), cdHistory[^1])) {
+                            fileData.Add((false, cdHistory[^1], instructionParts[1].Trim(), int.Parse(instructionParts[0])));
+                        }
+                        //GameObject gameFile = new GameObject(instructionParts[1].Trim()  + instructionParts[0]); //unity debug
+                        //gameFile.transform.SetParent(curGameDir.transform);
                         break;
                 }
-            }
+            }                        
+                    
 
-
-            
-
-            int resultTotal = 0;
-            InitDirSizes();
-            
-
-            int dirCount = 0;
-
-
+            int extraTotal = 0;
 
             for (int i =  0; i < fileData.Count; i++) {
-                
-                //if (fileData[i].rootDir == "/a") {
-                    //print(fileData[i]);
-                //}
-
-                
-                
-
-                
 
                 if (!fileData[i].isDir) { continue; }
-                print(fileData[i]);
-                print("SIZE: " + GetSizeExtra(fileData[i].rootDir + fileData[i].name));
-                continue;
+                //print(fileData[i]);
 
-                dirCount++;
-                //if (GetHowManyThings(fileData[i].rootDir + fileData[i].name) == 0) {
-                    //Debug.LogWarning($"Dir {fileData[i].name} has nothing in it!");
-                //}
+                int extraSize = GetSizeExtra(fileData[i].rootDir + fileData[i].name);
 
-                //print(fileData[i].size);
+                //print("SIZE: " + GetSizeExtra(fileData[i].rootDir + fileData[i].name));
 
-                int dirSize = GetSize(fileData[i].rootDir + fileData[i].name, true);
+                if (fileData[i].isDir && (extraSize <= 100000)) {
+                    extraTotal += extraSize;
+                }  
 
-                print(dirSize);                
-
-                if (fileData[i].isDir && (dirSize <= 100000)) {
-                    resultTotal += dirSize;
-                }
+                
 
             }
-
-            //print($"number of Dir = {dirCount}");
-
-
-
-            /*
-            foreach (var data in fileData) {                
-                if (!data.isDir) { continue; }
-
-                int dirSize = GetSize(data.name);
-
-                if (data.isDir && (dirSize <= 100000)) {
-                    resultTotal += dirSize;                    
-                }
-            }
-            */
-            print($"Result = {resultTotal}");
+            
+            print($"Extra  = {extraTotal}");            
 
 
         }
