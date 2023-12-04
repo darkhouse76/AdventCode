@@ -49,11 +49,11 @@ namespace CodeTAF
         }
         
 
-        GameObject GetChildByName(string targetName, GameObject targetObject) {
-            Transform[] childern = targetObject.transform.GetComponentsInChildren<Transform>();
+        Transform GetChildByName(string targetName, Transform targetObject) {
+            Transform[] childern = targetObject.GetComponentsInChildren<Transform>();
             foreach (Transform t in childern) {
                 if (t.name == targetName) {
-                    return t.gameObject;
+                    return t;
                 }
             }
             return null;
@@ -85,6 +85,7 @@ namespace CodeTAF
             fileData.Add((true, "root", "/", 0));
 
             List<string> cdHistory = new List<string>();
+            List<Transform> gameCDHistory = new List<Transform>();
 
             foreach (string instruction in instructions) {
                 string[] instructionParts = instruction.Split(" ");                
@@ -99,19 +100,22 @@ namespace CodeTAF
                                 switch (instructionParts[2].Trim()) {
                                     case "..":       
                                         if (cdHistory.Count == 1) { break; }
-                                        cdHistory.RemoveAt(cdHistory.Count-1);                                        
-                                        
+                                        cdHistory.RemoveAt(cdHistory.Count-1);
+                                        gameCDHistory.RemoveAt(gameCDHistory.Count-1);
+
                                         //else { curGameDir = curGameDir.transform.parent.gameObject; }
                                         break;
                                     case "/":
                                         cdHistory.Clear();
                                         cdHistory.Add("/");
+                                        gameCDHistory.Clear();
+                                        gameCDHistory.Add(baseGameFile.transform);
                                         
-                                        //curGameDir = baseGameFile;
                                         break;
                                     default:
                                         
                                         cdHistory.Add(cdHistory[^1] + instructionParts[2].Trim());
+                                        gameCDHistory.Add(GetChildByName(instructionParts[2].Trim(), gameCDHistory[^1]));
                                         
                                         //curGameDir = GetChildByName(instructionParts[2].Trim(),curGameDir);
                                         break;
@@ -128,19 +132,20 @@ namespace CodeTAF
                         //need to check if it already exists. 
                         if (!AlreadyExist(instructionParts[1].Trim(), cdHistory[^1])) {
                             fileData.Add((true, cdHistory[^1], instructionParts[1].Trim(), 0));
+                            GameObject gameDir = new GameObject(instructionParts[1].Trim()); //unity debug
+                            gameDir.transform.SetParent(gameCDHistory[^1]); //unity debug
                         }
-                        
-                        //GameObject gameDir = new GameObject(instructionParts[1].Trim()); //unity debug
-                        //gameDir.transform.SetParent(curGameDir.transform);
+
+
                         break;
                     default:
                         //print("file");
                         
                         if (!AlreadyExist(instructionParts[1].Trim(), cdHistory[^1])) {
                             fileData.Add((false, cdHistory[^1], instructionParts[1].Trim(), int.Parse(instructionParts[0])));
+                            GameObject gameFile = new GameObject(instructionParts[0] + " : " + instructionParts[1].Trim()); //unity debug
+                            gameFile.transform.SetParent(gameCDHistory[^1]); //unity debug
                         }
-                        //GameObject gameFile = new GameObject(instructionParts[1].Trim()  + instructionParts[0]); //unity debug
-                        //gameFile.transform.SetParent(curGameDir.transform);
                         break;
                 }
             }                        
