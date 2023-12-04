@@ -31,10 +31,16 @@ namespace CodeTAF
         void Main() {
             string[] cards = input.Split('\n');
 
-            int pointTotal = 0;
+            
 
+
+            int[] amountOfCards = new int[cards.Length];
+            Array.Fill<int>(amountOfCards, 1);
+
+            int curCard = -1;
+            //should made this a for and not foreach but whatever
             foreach (string card in cards) {
-
+                curCard++;
                 int winningIndex = card.IndexOf(":");
                 int cardNumIndex = card.IndexOf("|");
 
@@ -48,15 +54,24 @@ namespace CodeTAF
 
                 foreach (int num in winningNums) {
                     if (cardNums.Contains(num)) {
-                        if (points == 0) { points++; continue; }
-                        points *= 2;
+                        points++;
                     }
-                }             
+                }
+                if (points <= 0) { continue; }
 
-                pointTotal += points;
+                for (int i = 1; i <= points; i++) {
+                    amountOfCards[curCard + i] += 1 * amountOfCards[curCard];
+                } 
             }
 
-            print($"Point Total = {pointTotal}");
+            int cardTotal = 0;
+
+            foreach (int amount in amountOfCards) {
+                //print(amount); //debug
+                cardTotal += amount;
+            }
+
+            print($"Card Total = {cardTotal}");
 
 
 
