@@ -349,6 +349,8 @@ GameObject:
   - component: {fileID: 195304833}
   - component: {fileID: 195304834}
   - component: {fileID: 195304835}
+  - component: {fileID: 195304836}
+  - component: {fileID: 195304837}
   m_Layer: 0
   m_Name: AoC
   m_TagString: Untagged
@@ -465,6 +467,34 @@ MonoBehaviour:
   useTestInput: 1
   run: 0
   baseGameFile: {fileID: 661726173}
+--- !u!114 &195304836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 195304827}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c022921dd9becfb4c84a017297a1faf4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useTestInput: 1
+  run: 0
+--- !u!114 &195304837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 195304827}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e46be6d2a5465b4ba26d9d22548e697, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useTestInput: 1
+  run: 0
 --- !u!1 &661726173
 GameObject:
   m_ObjectHideFlags: 0
