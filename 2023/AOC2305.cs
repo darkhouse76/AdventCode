@@ -19,14 +19,12 @@ namespace CodeTAF
 
         void Main() {
             string[] lines = input.Split("\r\n");
-
             
             string[] seedsList = lines[1].Split();
             long[] seeds = new long[seedsList.Length];
             //parse seeds into array
             for (int i = 0; i < seedsList.Length; i++) {                
-                seeds[i] = long.Parse(seedsList[i]);
-                //print(seeds[i]);
+                seeds[i] = long.Parse(seedsList[i]);                
             }
 
             int curMap = 0; 
@@ -35,65 +33,53 @@ namespace CodeTAF
 
             //parse all map not seeds
             for (int i = 4; i < lines.Length; i++) {                
-                if (lines[i].Length == 0 ) {
-                    //print("change map");
+                if (lines[i].Length == 0 ) {                    
                     curMap++; 
                     maps.Add(new List<(long destIn, long sourceIn, long range)>());
                     continue;
                 }
                 else if (!char.IsDigit(lines[i][0])) {
                     continue;
-                }
-                //print(lines[i]);
+                }                
 
                 string[] mapList = lines[i].Split();
                 maps[curMap].Add((long.Parse(mapList[0]), long.Parse(mapList[1]), long.Parse(mapList[2])));
 
-            }
+            }  
 
-            //int debugSample = 3; //debug
-            //print(seeds[debugSample]);     
+            long curLocation = 1;
+            long seedResult = curLocation;
 
-            long curLocation = 1000;
-            long seedResult = curLocation;            
-            
             
             maps.Reverse();
+            foreach (var map in maps) {                
+                map.Reverse();                
+            }            
 
-            //foreach (var map in maps) {
-            //map.ToArray();
-            //map.Reverse();
-            //print(map[0]);
-            //}            
-
+            bool seedFound = false;
             do {
-                curLocation--;
+                curLocation++;
+                seedResult = curLocation;
                 foreach (var map in maps) {
 
                     for (int j = 0; j < map.Count; j++) {
-                        long diff = seedResult - map[j].destIn;
-                        //if (i == debugSample) { print("Map"); print(diff); print(map[j].destIn); } //debug
-                        if (diff >= 0 && diff <= map[j].range) {
-                            //print($"Seed {seeds[i]} is in range of {map[j]}");
-                            //do magic map stuff
+                        long diff = seedResult - map[j].destIn;                        
+                        if (diff >= 0 && diff <= map[j].range) {                            
                             seedResult = map[j].sourceIn + diff;
                             break;
                         }
                     }
-
-                    //print("Seed: " + seeds[debugSample]);
                 }
 
-            } while (!seeds.Contains(seedResult));
+                for (int i = 0; i < seeds.Length; i += 2) {
+                    if (seeds[i] <= seedResult && seedResult <= (seeds[i] + seeds[i + 1] - 1)) {
+                        seedFound = true;
+                    }
+                }
 
-
+            } while(!seedFound);
 
             print($"Seed Result = {seedResult} from location {curLocation}");
-
-            //Array.Sort(seeds);
-            //print($"Lowest Location = {seeds[0]}");
-
-
         }
          
 
