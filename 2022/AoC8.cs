@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using TreeEditor;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace CodeTAF
 {
@@ -15,6 +17,44 @@ namespace CodeTAF
 
 
         List<List<int>> trees = new List<List<int>>();
+
+
+        int getScenicScore (int targetX, int targetY) {
+            int targetHeight = trees[targetX][targetY];
+            int[] scenicScore = new int[4];
+
+            int curDir = 0;
+            //check right
+            for (int i = targetX + 1; i < trees.Count; i++) {
+                scenicScore[curDir]++;
+                if (trees[i][targetY] >= targetHeight) { break; }
+            }
+            curDir++;
+            
+            //check left
+            for (int i = targetX - 1; i >= 0; i--) {
+                scenicScore[curDir]++;
+                if (trees[i][targetY] >= targetHeight) { break; }
+            }
+            curDir++;
+            //check down
+            for (int i = targetY + 1; i < trees[targetX].Count; i++) {
+                scenicScore[curDir]++;
+                if (trees[targetX][i] >= targetHeight) { break; }
+            }
+            curDir++;
+            //check up
+            for (int i = targetY - 1; i >= 0; i--) {
+                scenicScore[curDir]++;
+                if (trees[targetX][i] >= targetHeight) { break; }
+            }
+
+            int total = 1;
+            foreach (int score  in scenicScore) {
+                total *= score;
+            }
+            return total;
+        }
 
         bool isVisible(int targetX, int targetY) {
             int targetHeight = trees[targetX][targetY];
@@ -65,6 +105,7 @@ namespace CodeTAF
             //print(trees[0][3]);
 
             int totalVisTrees = (trees.Count * 2) + ((trees[0].Count - 2) * 2);
+            int highestScore = 0;
 
             for (int i = 1;i < trees.Count -1; i++) {
                 //each inner col
@@ -73,12 +114,17 @@ namespace CodeTAF
                     if (isVisible(i, j)) { //print($"Tree @({i},{j}) is visible"); }
                         totalVisTrees++;
                     }
+                    highestScore = math.max(highestScore, getScenicScore(i, j));                    
                 }  
             }
 
             print($"Total visible trees = {totalVisTrees}");
+
+            print($"Highest Scenic Score = {highestScore}");
+
         }
 
+        
 
         void Update() {
             if (run) {
