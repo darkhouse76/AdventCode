@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
@@ -51,26 +52,46 @@ namespace CodeTAF
             }
 
             //int debugSample = 3; //debug
-            //print(seeds[debugSample]);
+            //print(seeds[debugSample]);     
+
+            long curLocation = 1000;
+            long seedResult = curLocation;            
             
-            foreach (var map in maps) {                
-                for (int i = 0; i < seeds.Length; i++) {
+            
+            maps.Reverse();
+
+            //foreach (var map in maps) {
+            //map.ToArray();
+            //map.Reverse();
+            //print(map[0]);
+            //}            
+
+            do {
+                curLocation--;
+                foreach (var map in maps) {
+
                     for (int j = 0; j < map.Count; j++) {
-                        long diff = seeds[i] - map[j].sourceIn;
+                        long diff = seedResult - map[j].destIn;
                         //if (i == debugSample) { print("Map"); print(diff); print(map[j].destIn); } //debug
                         if (diff >= 0 && diff <= map[j].range) {
                             //print($"Seed {seeds[i]} is in range of {map[j]}");
                             //do magic map stuff
-                            seeds[i] = map[j].destIn + diff;
+                            seedResult = map[j].sourceIn + diff;
                             break;
                         }
                     }
-                }
-                //print("Seed: " + seeds[debugSample]);
-            }
 
-            Array.Sort(seeds);
-            print($"Lowest Location = {seeds[0]}");
+                    //print("Seed: " + seeds[debugSample]);
+                }
+
+            } while (!seeds.Contains(seedResult));
+
+
+
+            print($"Seed Result = {seedResult} from location {curLocation}");
+
+            //Array.Sort(seeds);
+            //print($"Lowest Location = {seeds[0]}");
 
 
         }
