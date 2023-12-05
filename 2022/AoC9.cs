@@ -21,12 +21,11 @@ namespace CodeTAF
 
         void Main() {
 
-            Vector2Int head = Vector2Int.zero;
-            Vector2Int tail = Vector2Int.zero;
-            List<Vector2Int> tailLocations = new List<Vector2Int> { tail };
-
+            List<Vector2Int> rope = new List<Vector2Int>();
+            for (int i = 0; i < 10; i++) { rope.Add(Vector2Int.zero); }
+            
+            List<Vector2Int> tailLocations = new List<Vector2Int> { rope[^1] };
             string[] headMoves = input.Split("\r\n");
-
             Vector2Int moveVector;
 
             foreach (string move in headMoves) {
@@ -50,26 +49,29 @@ namespace CodeTAF
                         break;
                 }
 
-                for (int i = 0; i < moveAmount; i++) {                    
+                for (int i = 0; i < moveAmount; i++) {
                     //do the movement
-                    head += moveVector;
+                    rope[0] += moveVector;
 
                     //move tail if needed
-                    Vector2Int curSeperation = (head - tail);
-                    
-                    if (math.abs(curSeperation.x) > 1 | math.abs(curSeperation.y) > 1) {                        
-                        if (curSeperation.x == 0 | curSeperation.y == 0) {
-                            //just move closer
-                            tail += (curSeperation / 2);
-                        }
-                        else {
-                            //move the weird diagonal
-                            tail += new Vector2Int(curSeperation.x / math.abs(curSeperation.x), curSeperation.y / math.abs(curSeperation.y));
+
+                    for (int j = 1; j < rope.Count; j++) {
+
+                        Vector2Int curSeperation = (rope[j-1] - rope[j]);
+
+                        if (math.abs(curSeperation.x) > 1 | math.abs(curSeperation.y) > 1) {
+                            if (curSeperation.x == 0 | curSeperation.y == 0) {
+                                //just move closer
+                                rope[j] += (curSeperation / 2);
+                            }
+                            else {
+                                //move the weird diagonal
+                                rope[j] += new Vector2Int(curSeperation.x / math.abs(curSeperation.x), curSeperation.y / math.abs(curSeperation.y));
+                            }
                         }
                     }
-
                     //log tail positions if they are new.
-                    if (!tailLocations.Contains(tail)) { tailLocations.Add(tail); }
+                    if (!tailLocations.Contains(rope[^1])) { tailLocations.Add(rope[^1]); }
                 }
             }
             print($"Number of tail Locations = {tailLocations.Count}");            
@@ -91,14 +93,14 @@ namespace CodeTAF
 
         string InputTest() {
             return
-@"R 4
-U 4
-L 3
-D 1
-R 4
-D 1
-L 5
-R 2";
+@"R 5
+U 8
+L 8
+D 3
+R 17
+D 10
+L 25
+U 20";
         }
 
         string Input() {
