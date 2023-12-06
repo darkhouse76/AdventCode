@@ -55,7 +55,8 @@ namespace CodeTAF
             foreach (var map in maps) {                
                 map.Reverse();                
             }            
-
+            //Approx 308 million lines of code ran with real data            
+                       
             bool seedFound = false;
             do {
                 curLocation++;
@@ -90,7 +91,9 @@ namespace CodeTAF
 
                 if (useTestInput) { input = InputTest(); }
                 else { input = Input(); }
+                var startTime = System.DateTime.Now;                
                 Main();
+                print($"Took {System.DateTime.Now - startTime} to complete.");
             }
         }
 
