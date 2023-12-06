@@ -15,13 +15,14 @@ namespace CodeTAF
 
         void Main() {
             //change to real data
-            int[] raceTime = { 48, 93, 85, 95 };
-            int[] raceDist = { 296, 1928, 1236, 1391 };
+            long[] raceTime = { 48938595 };
+            long[] raceDist = { 296192812361391 };
 
             int totalWins = 1;
 
             for (int i = 0; i < raceTime.Length; i++) {
                 int possibleWins = 0;
+                print(i);
                 for (int buttonHold = 1; buttonHold < raceTime[i]; buttonHold++) {
                     if (buttonHold * (raceTime[i] - buttonHold) > raceDist[i]) {
                         //beat dist
