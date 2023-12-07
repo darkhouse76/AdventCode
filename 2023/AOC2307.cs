@@ -15,7 +15,7 @@ namespace CodeTAF
         private bool run = false;
         private string input;
 
-        static char[] cardRanks = { 'A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2' }; //lower better
+        static char[] cardRanks = { 'A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J' }; //lower better //part2 change J pos to last
 
         class Hand {          
 
@@ -113,7 +113,7 @@ namespace CodeTAF
                 int mostAmount = 0;
                 int secondMost = 0;                
 
-                for (int k = 0; k < amountCards.Length; k++) {                    
+                for (int k = 0; k < amountCards.Length - 1; k++) {                    
 
                     if (amountCards[k] > mostAmount) {
                         secondMost = mostAmount;
@@ -125,7 +125,7 @@ namespace CodeTAF
                     if (mostAmount + secondMost == 5) { break; }
                 }     
 
-                allHands[i].HandRank = getHandRank(mostAmount, secondMost);                  
+                allHands[i].HandRank = getHandRank((mostAmount + amountCards[^1]), secondMost);                  
             }
 
 

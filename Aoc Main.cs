@@ -8,16 +8,20 @@ namespace CodeTAF
     public class AocMain : MonoBehaviour
     {
         [SerializeField]
+        private bool partTwo = false;
+        [SerializeField]
         private bool useTestInput = true;
         [SerializeField]
         private bool run = false;
         private string input;
 
-
-        void Main() {
+        void part1() {
 
         }
 
+        void part2() {
+
+        }
         
         void Update()
         {
@@ -29,7 +33,8 @@ namespace CodeTAF
                 else { input = Input(); }
 
                 var startTime = System.DateTime.Now;
-                Main();
+                if (partTwo) { part2(); }
+                else { part1(); }                
                 print($"Took {System.DateTime.Now - startTime} to complete.");
             }
         }
