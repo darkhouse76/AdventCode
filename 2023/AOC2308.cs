@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace CodeTAF
 {
@@ -34,13 +37,6 @@ namespace CodeTAF
                 nodeDir[nodeNum,1] = bob[i].ToString();
             }
 
-
-            //print($"Route = {route}.");
-            //for (int i = 0; i < nodeLookup.Length; i++)
-            //{
-                //print($"Node {nodeLookup[i]} = Left: {nodeDir[i,0]} Right: {nodeDir[i,1]}");
-            //}
-
             string curNode = "AAA";
             int stepsTaken = 0;
             int routeCount = -1;
@@ -67,9 +63,78 @@ namespace CodeTAF
 
         void part2() {
 
+            //parse input      
+            Regex regex = new(@"[A-Z]+");
+
+            var bob = regex.Matches(input);
+
+            string route = bob[0].ToString();
+
+            string[] nodeLookup = new string[(bob.Count - 1) / 3];
+            string[,] nodeDir = new string[(bob.Count - 1) / 3, 2];
+
+            List<string> startNodes = new List<string>();
+
+            for (int i = 3; i < bob.Count; i += 3) {
+                int nodeNum = (i / 3) - 1;
+
+                nodeLookup[nodeNum] = bob[i - 2].ToString();
+                nodeDir[nodeNum, 0] = bob[i - 1].ToString();
+                nodeDir[nodeNum, 1] = bob[i].ToString();
+
+                if (nodeLookup[nodeNum][^1] == 'A' ) {
+                    startNodes.Add(nodeLookup[nodeNum]);
+                }
+            }
+
+            long[] nodeSteps = new long[startNodes.Count];
+
+            for (int i = 0; i < startNodes.Count; i++) {                
+                nodeSteps[i] = numberOfSteps(startNodes[i], route, nodeLookup, nodeDir);
+            }
+
+            print($"Number of Steps need = {LCM(nodeSteps)}");
+           
+        }
 
 
+        long numberOfSteps(string startNode, string route, string[] nodeLookup, string[,] nodeDir) {         
 
+
+            long stepsTaken = 0;
+            int routeCount = -1;
+            do {
+                stepsTaken++;
+                if (++routeCount % route.Length == 0) {
+                    routeCount = 0;
+                }
+                int curNodeIndex = Array.IndexOf(nodeLookup, startNode);
+
+                switch (route[routeCount]) {
+                    case 'L':
+                        startNode = nodeDir[curNodeIndex, 0];
+                        break;
+                    case 'R':
+                        startNode = nodeDir[curNodeIndex, 1];
+                        break;
+                }
+            } while (startNode[^1] != 'Z');
+
+            //print($"Number of Steps needed = {stepsTaken}");
+
+            return stepsTaken;           
+
+        }
+        
+        //Next three methods I grabbed from stackoverflow. I mostly understand it but got the job done. 
+        static long LCM(long[] numbers) {
+            return numbers.Aggregate(lcm);
+        }
+        static long lcm(long a, long b) {
+            return Math.Abs(a * b) / GCD(a, b);
+        }
+        static long GCD(long a, long b) {
+            return b == 0 ? a : GCD(b, a % b);
         }
 
         void Update() {
@@ -90,11 +155,16 @@ namespace CodeTAF
 
         string InputTest() {
             return
-@"LLR
+@"LR
 
-AAA = (BBB, BBB)
-BBB = (AAA, ZZZ)
-ZZZ = (ZZZ, ZZZ)";
+GHA = (GHB, XXX)
+GHB = (XXX, GHZ)
+GHZ = (GHB, XXX)
+IKA = (IKB, XXX)
+IKB = (IKC, IKC)
+IKC = (IKZ, IKZ)
+IKZ = (IKB, IKB)
+XXX = (XXX, XXX)";
         }
 
         string Input() {
