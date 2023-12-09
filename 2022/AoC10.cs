@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,8 +6,7 @@ using UnityEngine;
 
 namespace CodeTAF
 {
-    public class AoC10 : MonoBehaviour
-    {
+    public class AoC10 : MonoBehaviour {
         [SerializeField]
         private bool partTwo = false;
         [SerializeField]
@@ -18,7 +18,8 @@ namespace CodeTAF
         private int register;
         private int cycleCount;
         private int signalStrengths;
-        private int[] targetCycles = {20,60,100,140,180,220};
+        private int[] targetCycles = { 20, 60, 100, 140, 180, 220 };
+        private char[] CRTscreen;
 
         void Cycle(int numCycles = 1,int registerChange = 0) {
 
@@ -29,6 +30,21 @@ namespace CodeTAF
                 }
             }
 
+            register += registerChange;
+        }
+
+        void CycleP2(int numCycles = 1, int registerChange = 0) {
+
+            for (int i = 0; i < numCycles; i++) {
+
+                int curScreenX = cycleCount - (40 * (cycleCount / 40));
+
+                if (register - 1 <= curScreenX && curScreenX <= register + 1) {
+                    //in sprite range
+                    CRTscreen[cycleCount] = '#';
+                }
+                cycleCount++;               
+            }
             register += registerChange;
         }
 
@@ -61,7 +77,39 @@ namespace CodeTAF
         }
 
         void part2() {
+            //note the result had to be put into a basic text for it to proper allign instead of using unity log. 
+            string[] instructions = input.Split("\r\n");
 
+            CRTscreen = new char[240];
+            Array.Fill<char>(CRTscreen, '.');
+
+            register = 1;
+            cycleCount = 0;
+
+            int cyclesToExcuteAddx = 2;            
+
+            for (int i = 0; i < instructions.Length; i++) {
+                string[] instruction = instructions[i].Split();
+
+                if (instruction.Length > 1) {
+                    //it's addX
+                    CycleP2(cyclesToExcuteAddx, int.Parse(instruction[1]));
+                }
+                else {
+                    //it's noop
+                    CycleP2();
+                }
+            }
+
+            string screen = "";
+
+            for (int i = 0; i < CRTscreen.Length; i ++) {               
+                
+                if (i%40 == 0) { screen += "\n"; }
+                screen += CRTscreen[i];
+            }
+
+            print(screen);
         }
 
         void Update() {
