@@ -104,9 +104,7 @@ namespace CodeTAF
 
                 do {
                     readings.Add(NextSeq(readings[^1]));
-
                 } while (!reachedZero(readings[^1]));
-
 
                 // now figure out the next one in history
                 int lastResult = 0;
@@ -114,7 +112,6 @@ namespace CodeTAF
                 for (int i = (readings.Count - 2); i >= 0; i--) {
                     lastResult = readings[i][0] - lastResult;
                 }
-
 
                 print($"Last number = {readings[0][^1]} Next= {lastResult}");
 
