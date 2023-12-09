@@ -91,6 +91,47 @@ namespace CodeTAF
 
         void part2() {
 
+            string[] history = input.Split("\r\n");
+            List<int[]> readings = new List<int[]>();
+
+            int grandHistoryTotal = 0;
+
+            foreach (string line in history) {
+                readings.Clear();
+
+                string[] tempRead = line.Split();
+                readings.Add(Array.ConvertAll(tempRead, int.Parse));
+
+                do {
+                    readings.Add(NextSeq(readings[^1]));
+
+                } while (!reachedZero(readings[^1]));
+
+
+                // now figure out the next one in history
+                int lastResult = 0;
+
+                for (int i = (readings.Count - 2); i >= 0; i--) {
+                    lastResult = readings[i][0] - lastResult;
+                }
+
+
+                print($"Last number = {readings[0][^1]} Next= {lastResult}");
+
+                for (int i = 0; i < readings.Count; i++) {
+                    string printThis = printArray(readings[i]);
+                    for (int j = 0; j < i; j++) {
+                        printThis = " " + printThis;
+                    }
+
+                    print("\t" + printThis);
+                }
+
+
+                grandHistoryTotal += lastResult;
+            }
+
+            print($"Grand Total = {grandHistoryTotal}");
         }
 
         void Update() {
