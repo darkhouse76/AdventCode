@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace CodeTAF
@@ -18,7 +16,24 @@ namespace CodeTAF
         private string input;
 
 
+        [SerializeField]
+        private Transform parentForMaze;
+        [SerializeField]
+        private Transform parentForPath;
+        [SerializeField]
+        private GameObject[] prefabs = new GameObject[7];
+        private char[] prefabLookup = { '|', '-', 'L', 'J', '7', 'F', 'S', '.' };
+
+        [SerializeField]
+        private Material testMaterial;
+
+        private GameObject[,] mazeObj;
+
         Vector2Int errorVector = new Vector2Int(-404, -404);
+
+        private Vector2Int[] visDemo;
+        private bool visPath;
+        private int visStep = 0;
 
 
         char[,] ParseMaze(out Vector2Int mazeStart) {
@@ -67,11 +82,47 @@ namespace CodeTAF
 
         }
 
-        void part1() {
+        bool changeColor(GameObject obj, Color color) {
+            Renderer[] renderer = obj.GetComponentsInChildren<Renderer>();
+            
+            for (int i = 0; i < renderer.Length; i++) {
+                if (renderer[i].material.color == color) { return false; }
+                renderer[i].material.color = color;                
+            }
+            return true;
+        }
+
+        void DrawMaze(char[,] maze) {
+                       
+            print(maze.GetLength(0)); //x
+            print(maze.GetLength(1)); //y
+
+            mazeObj = new GameObject[maze.GetLength(0), maze.GetLength(1)];
+
+            for (int line = 0;  line < maze.GetLength(1); line++) {
+                for (int column = 0; column < maze.GetLength(0); column++) {
+                    char mazePipe = maze[column, line];
+                    //if (mazePipe == '.') { continue; }
+                    GameObject targetPipe = GetPrefab(mazePipe);
+                    mazeObj[column,line] = Instantiate(targetPipe,new Vector3(column, line), targetPipe.transform.rotation, parentForMaze);                    
+                    
+                }
+            }
+
+
+        }
+
+        private GameObject GetPrefab(char pipeType) {          
+
+            return prefabs[Array.IndexOf(prefabLookup, pipeType)];
+        }
+
+        Vector2Int[] part1() {
             
             char[,] maze = ParseMaze(out Vector2Int startPos);
             Vector2Int[] startDir = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };            
             int highestCount = 0;
+            List<Vector2Int> correctPath = new List<Vector2Int>();
 
             for (int i = 0; i < startDir.Length; i++) {
                 //each start dir
@@ -79,18 +130,25 @@ namespace CodeTAF
                 Vector2Int curPos = startPos;
                 Vector2Int newDir = startDir[i];
                 Vector2Int debugDir;
+                List<Vector2Int> curPath = new List<Vector2Int>();
+
                 print("CHECKING Dir = " + startDir[i] + "Start Pos = " + startPos);
                 do {
                     //loop don't know which kind yet
                     stepsCount++;
                     curPos += newDir;
+                    curPath.Add(curPos);
                     debugDir = newDir;
                     newDir = GetDirection(maze[curPos.x, curPos.y], newDir);                    
                     if (newDir != Vector2Int.zero && newDir != errorVector) { continue; }
                     if (newDir == Vector2Int.zero) {
                         print("Came in from " + debugDir);
                         if (stepsCount %2 != 0 ) { print("uneven steps = " +stepsCount); }
-                        highestCount = math.max((stepsCount / 2), highestCount);
+
+                        if (highestCount < stepsCount / 2) {
+                            highestCount = (stepsCount / 2);
+                            correctPath = curPath;
+                        }
                     }
                     break;
 
@@ -99,12 +157,88 @@ namespace CodeTAF
             }
 
             print($"Longest Steps from Start = {highestCount}");
-
+            return correctPath.ToArray();
         }
 
         void part2() {
 
+            Color pathColor = Color.red;
+            Color insidePath = Color.green;
+            Color outsidePath = Color.blue;
+            bool isInsideLeft = true;
+
+            Vector2Int[] mazePath = part1();
+            visDemo = mazePath;
+
+            char[,] maze = ParseMaze(out Vector2Int startPos);
+            Vector2Int[] startDir = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+
+            DrawMaze(maze);
+
+            //return; //temp for vis
+
+            int totalInside = 0;
+            
+            for (int i = 0; i < mazePath.Length; i++) {                
+                GameObject target = mazeObj[mazePath[i].x, mazePath[i].y];
+                changeColor(target, pathColor);
+                target.transform.parent = parentForPath;                
+
+                //inside part
+                if (i != 0 ) {
+                    totalInside += CheckSide(maze, mazePath, mazePath[i], getSideDir(mazePath[i] - mazePath[i - 1], isInsideLeft), insidePath);                    
+                }
+                if (i !=  mazePath.Length - 1 ) {
+                    totalInside += CheckSide(maze, mazePath, mazePath[i], getSideDir(mazePath[i+1] - mazePath[i], isInsideLeft), insidePath);
+                    
+                }
+            }
+
+            print($"Total inside count = {totalInside}");
+            
         }
+
+
+        
+
+
+        bool OutofBounds(Vector2Int pos, char[,] maze ) {
+            if (pos.x < 0 || pos.x >= maze.GetLength(0)) { return true; }
+            if (pos.y < 0 || pos.y >= maze.GetLength(1)) { return true; }
+
+            return false;
+        }
+
+        private int CheckSide(char[,] maze, Vector2Int[] mazePath, Vector2Int startPos, Vector2Int targetDir, Color targetColor) {
+
+            int totalInside = 0;
+
+            Vector2Int curDir = targetDir;
+            Vector2Int curPos = startPos + curDir;
+
+            if (!OutofBounds(curPos, maze)) {
+                while (!mazePath.Contains(curPos)) {
+                    if (changeColor(mazeObj[curPos.x, curPos.y], targetColor)) { totalInside++; }
+                    curPos += curDir;                    
+                    if (OutofBounds(curPos, maze)) { break; }
+
+                }
+            }
+
+            return totalInside;
+
+        }
+
+        Vector2Int getSideDir(Vector2Int direction, bool leftSide = true ) {
+            
+            if (direction == Vector2Int.up) { return leftSide ? Vector2Int.left : Vector2Int.right; }
+            if (direction == Vector2Int.down) { return leftSide ? Vector2Int.right : Vector2Int.left; }
+            if (direction == Vector2Int.left) { return leftSide ? Vector2Int.down : Vector2Int.up; }
+            if (direction == Vector2Int.right) { return leftSide ? Vector2Int.up : Vector2Int.down; }
+
+            return Vector2Int.zero;
+        }
+
 
         void Update() {
             if (run) {
@@ -118,17 +252,52 @@ namespace CodeTAF
                 if (partTwo) { part2(); }
                 else { part1(); }
                 print($"Took {System.DateTime.Now - startTime} to complete.");
+                visStep = 0;
+                //visPath = true; //remove to renable visPath;
+
+
             }
+
+            if (visPath) {
+                GameObject target = mazeObj[visDemo[visStep].x, visDemo[visStep].y];
+                changeColor(target,Color.red);
+                target.transform.parent = parentForPath;
+                visStep++;
+
+                if (visStep >= visDemo.Length) {
+                    visPath = false;
+                }
+            }            
+
         }
 
 
         string InputTest() {
             return
-@".7-F7-
-..FJ|7
-.SJLL7
-.|F--J
-.LJ.LJ";
+@"....................
+FF7FSF7F7F7F7F7F---7
+L|LJ||||||||||||F--J
+FL-7LJLJ||||||LJL-77
+F--JF--7||LJLJ7F7FJ-
+L---JF-JLJ.||-FJLJJ7
+|F|F-JF---7F7-L7L|7|
+|FFJF7L7F-JF7|JL---7
+7-L-JL7||F7|L7F-7F7|
+L.L7LFJ|||||FJL7||LJ
+L7JLJL-JLJLJL--JLJ.L";
+        }
+
+        string InputExtra() {
+            return
+@"..........
+.S------7.
+.|F----7|.
+.||....||.
+.||....||.
+.|L-7F-J|.
+.|..||..|.
+.L--JL--J.
+..........";
         }
 
         string Input() {
