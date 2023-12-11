@@ -37,7 +37,7 @@ namespace CodeTAF
             return (n * (n - 1)) / 2;
         }
 
-        int distPath(Vector2Int startLoc,  Vector2Int endLoc) {            
+        long distPath(Vector2Int startLoc,  Vector2Int endLoc) {            
             Vector2Int path = (endLoc - startLoc);
             return math.abs(path.x) + math.abs(path.y);
         }
@@ -99,7 +99,7 @@ namespace CodeTAF
             printUniv(universe);
 
             //get all path distances between all galaxies
-            int totalPathDist = 0;
+            long totalPathDist = 0;
             
             for (int i = 0; i < galaxyLocations.Count - 1; i++) {
                 Vector2Int startGalaxy = galaxyLocations[i];
@@ -112,8 +112,64 @@ namespace CodeTAF
 
         }
 
-        void part2() {
+        void part2() {            
+            const char GALAXY = '#';
+            const int SIZE_OF_EXPANSION = 1000000 - 1;
 
+            string[] image = input.Split("\r\n");
+
+            //check and note which parts need expansion  
+            bool[] colExpand = new bool[image[0].Length];
+            Array.Fill(colExpand, true);
+            bool[] rowExpand = new bool[image[0].Length];
+            Array.Fill(rowExpand, true);
+
+            for (int row = 0; row < image.Length; row++) {
+                for (int col = 0; col < image[row].Length; col++) {
+                    if (image[row][col] == GALAXY) {
+                        colExpand[col] = false;
+                        rowExpand[row] = false;
+                    }
+                }
+            }
+
+            //expand the universe and note galazy Locations;            
+            List<Vector2Int> galaxyLocations = new();
+
+            int expandedRow = -1;
+            for (int row = 0; row < image.Length; row++) {
+                expandedRow++;
+                int expandedCol = -1;
+                for (int col = 0; col < image[row].Length; col++) {
+                    char curImage = image[row][col];
+                    expandedCol++;                    
+                    if (curImage == GALAXY) {
+                        galaxyLocations.Add(new Vector2Int(expandedCol, expandedRow));
+                        continue;
+                    }                    
+                    if (colExpand[col]) {
+                        for (int i = 1; i <= SIZE_OF_EXPANSION; i++) {
+                            expandedCol++;                            
+                        }                     
+                    }
+                }
+                if (rowExpand[row]) { expandedRow += SIZE_OF_EXPANSION; }
+            }
+            //debug print stuff
+            print("Number of Galaxies = " + galaxyLocations.Count); //debug
+            print("Number of Pairs = " + amountOfPairs(galaxyLocations.Count));            
+
+            //get all path distances between all galaxies
+            long totalPathDist = 0;
+
+            for (int i = 0; i < galaxyLocations.Count - 1; i++) {
+                Vector2Int startGalaxy = galaxyLocations[i];
+                for (int j = i + 1; j < galaxyLocations.Count; j++) {
+                    totalPathDist += distPath(startGalaxy, galaxyLocations[j]);
+                }
+            }
+
+            print($"Total sum of all Path Distances = {totalPathDist}");
         }
 
         void Update() {
