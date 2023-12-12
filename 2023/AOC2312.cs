@@ -25,6 +25,8 @@ namespace CodeTAF
 
         bool isPossible(string springs, int[] brokenGroups) {
 
+            //if (springs.Count(c => c == SPRING_BROKEN) != brokenGroups.Sum()) { return false; }
+
             List<int> testGroup = new List<int>();
             int groupSize = 0;
             for (int spring = 0; spring < springs.Length; spring++) {
@@ -59,17 +61,23 @@ namespace CodeTAF
 
         int CheckAll(string springs, int[] brokenGroups) {
 
+            int knownBroken = springs.Count(c => c == SPRING_BROKEN);
+
             int amtUnknowns = springs.Count(c => c == SPRING_UNK);
             int amtCombos = (int)math.pow(2, amtUnknowns);
             int validCombos = 0;
 
             for (int i = 0; i < amtCombos; i++) {
-                string binary = Convert.ToString(i, 2);
+                string binary = Convert.ToString(i, 2);                
+
                 int addZeros = (amtUnknowns - binary.Length);
                 for (int j = 0; j < addZeros; j++) {                    
                     binary = "0" + binary;
                 }
-                
+
+                //print($"BindryCount = {})
+                if ((binary.Count(c => c == '0') + knownBroken) != brokenGroups.Sum()) { continue; }
+
                 if (isPossible(GetCombo(springs, binary),brokenGroups)) {                    
                     validCombos++;
                 }                
