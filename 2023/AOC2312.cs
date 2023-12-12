@@ -1,9 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text.RegularExpressions;
+using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace CodeTAF
 {
@@ -17,52 +18,94 @@ namespace CodeTAF
         private bool run = false;
         private string input;
 
-        string[] nums;
+        const char SPRING_BROKEN = '#';
+        const char SPRING_WORKING = '.';
+        const char SPRING_UNK = '?';
+        
 
+        bool isPossible(string springs, int[] brokenGroups) {
+
+            List<int> testGroup = new List<int>();
+            int groupSize = 0;
+            for (int spring = 0; spring < springs.Length; spring++) {
+                if (springs[spring] == SPRING_BROKEN) { 
+                    groupSize++; 
+                    continue; 
+                }
+                if (groupSize == 0) { continue; }
+
+                testGroup.Add(groupSize);
+                groupSize = 0;
+            }            
+            if (groupSize > 0) { testGroup.Add(groupSize); }
+
+            if (testGroup.Count != brokenGroups.Length) { return false; }            
+            for (int i = 0; i < testGroup.Count; i++) {
+                if (testGroup[i] != brokenGroups[i]) { return false; }
+            }           
+
+            return true;
+        }
+
+        string GetCombo(string springs, string binaryKey) {
+            
+            for (int key = 0; key < binaryKey.Length; key++) {
+                char replacement = (binaryKey[key] == '1') ? SPRING_WORKING : SPRING_BROKEN;
+                int indexReplace = springs.IndexOf(SPRING_UNK);                
+                springs = springs.Remove(indexReplace,1).Insert(indexReplace, replacement.ToString());
+            }
+            return springs;
+        }
+
+        int CheckAll(string springs, int[] brokenGroups) {
+
+            int amtUnknowns = springs.Count(c => c == SPRING_UNK);
+            int amtCombos = (int)math.pow(2, amtUnknowns);
+            int validCombos = 0;
+
+            for (int i = 0; i < amtCombos; i++) {
+                string binary = Convert.ToString(i, 2);
+                int addZeros = (amtUnknowns - binary.Length);
+                for (int j = 0; j < addZeros; j++) {                    
+                    binary = "0" + binary;
+                }
+                
+                if (isPossible(GetCombo(springs, binary),brokenGroups)) {                    
+                    validCombos++;
+                }                
+            }
+
+            return validCombos;
+        }
+        
+        
         void part1() {
-            Regex regex = new(@"\W+");
-            Regex tester = new(@"\s+");
-            string[] bob = regex.Split(input);
-
+ 
             string[] house = input.Split("\r\n");
             string[] parts;
-            
-
-            for (int i = 0; i < house.Length; i++) {               
-
-                string[] amountsString = regex.Split(house[i]);
-                string springs = house[i].Split()[0];
-
-                int[] amounts = new int[amountsString.Length-1];
-                print(amountsString.Length);
-                for (i = 1; i < amountsString.Length; i++) {
-                    print(i);
-                    print(amountsString[i]);
-                    amounts[i-1] = int.Parse(amountsString[i]);
-                }
-                
-                //string springs = regex.Split(house[i])[0];
-
-                print(springs);               
-                print(amounts[0]);
-
-            }
-
-
+            List<List<int>> amountsBroken = new List<List<int>>();
+            List<string> springs = new List<string>();
+            string[] nums;
 
             for (int i = 0; i < house.Length; i++) {
+                amountsBroken.Add(new List<int>());
+
                 parts = house[i].Split(" ");
-                for (int j = 0; j < parts.Length; j++) {
-                    nums = parts[j].Split(",");
-                }  
+                springs.Add(parts[0]);
+                nums = parts[1].Split(",");                
                 for (int j = 0; j < nums.Length; j++) {
-                    //print(nums[j]);
-                }
+                    amountsBroken[i].Add(int.Parse(nums[j]));                                    
+                }               
             }
-            for (int i = 0; i < bob.Length; i++) {
-                //print(bob[i]);
-                
+
+            int totalValidCombos = 0;
+
+            for (int line = 0; line < springs.Count; line++) {
+                totalValidCombos += CheckAll(springs[line], amountsBroken[line].ToArray());
             }
+
+            print($"Total Possible Valid Combos = {totalValidCombos}");
+
         }
 
         void part2() {
@@ -87,7 +130,7 @@ namespace CodeTAF
 
         string InputTest() {
             return
-@"???.### 167,1,3
+@"???.### 1,1,3
 .??..??...?##. 1,1,3
 ?#?#?#?#?#?#?#? 1,3,1,6
 ????.#...#... 4,1,1
