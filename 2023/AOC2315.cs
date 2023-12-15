@@ -18,16 +18,13 @@ namespace CodeTAF
         int HashAlgorithm(char inputHash, int curValue) {
 
             int acii = (int)inputHash;
-            curValue += acii;
-            curValue *= 17;
-
-            return curValue % (curValue / 256);
+            return ((curValue + acii) * 17) % 256;            
         }
 
         int HashString(string inputHash, int curValue = 0) {
 
             for (int curChar = 0;  curChar < inputHash.Length; curChar++) {
-                curValue = HashAlgorithm(inputHash[curChar], curValue);
+                curValue = HashAlgorithm(inputHash[curChar], curValue);                
             }
             
             return curValue;
@@ -38,15 +35,13 @@ namespace CodeTAF
 
             string[] hashList = input.Split(",");
 
-            int resultTotal = 0;
+            int resultTotal = 0;            
 
-            for (int curHash = 0; curHash < hashList.Length; curHash++) {
-                print(hashList[curHash]);
-                print(HashString(hashList[curHash]));
+            for (int curHash = 0; curHash < hashList.Length; curHash++) {                
+                resultTotal += HashString(hashList[curHash]);
             }
 
             print($"Result Total = {resultTotal}");
-
         }
 
         void part2() {
