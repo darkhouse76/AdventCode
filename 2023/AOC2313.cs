@@ -27,34 +27,77 @@ namespace CodeTAF
             int checkPos = (int)(ReflectPos + distFromReflect);
             int checkNeg = (int)(ReflectPos - distFromReflect);
 
-            if (checkVertical) {
-                do {
-                    for (int Line = 0; Line < mirorArray.GetLength(1); Line++) {
-                        if (mirorArray[checkPos, Line] != mirorArray[checkNeg, Line]) {
-                            return false;
+            if (!partTwo) {
+
+                if (checkVertical) {
+                    do {
+                        for (int Line = 0; Line < mirorArray.GetLength(1); Line++) {
+                            if (mirorArray[checkPos, Line] != mirorArray[checkNeg, Line]) {
+                                return false;
+                            }
                         }
-                    }
 
-                    distFromReflect++;
-                    checkPos = (int)(ReflectPos + distFromReflect);
-                    checkNeg = (int)(ReflectPos - distFromReflect);
+                        distFromReflect++;
+                        checkPos = (int)(ReflectPos + distFromReflect);
+                        checkNeg = (int)(ReflectPos - distFromReflect);
 
-                } while (checkPos < mirorArray.GetLength(0) && checkNeg >= 0);
+                    } while (checkPos < mirorArray.GetLength(0) && checkNeg >= 0);
+                }
+                else {
+                    do {
+                        for (int Line = 0; Line < mirorArray.GetLength(0); Line++) {
+                            if (mirorArray[Line, checkPos] != mirorArray[Line, checkNeg]) {
+                                return false;
+                            }
+                        }
+
+                        distFromReflect++;
+                        checkPos = (int)(ReflectPos + distFromReflect);
+                        checkNeg = (int)(ReflectPos - distFromReflect);
+
+                    } while (checkPos < mirorArray.GetLength(1) && checkNeg >= 0);
+
+                }
             }
             else {
-                do {
-                    for (int Line = 0; Line < mirorArray.GetLength(0); Line++) {
-                        if (mirorArray[Line, checkPos] != mirorArray[Line, checkNeg]) {
-                            return false;
+
+                bool correctedSmudge = false;
+                if (checkVertical) {
+                    do {
+                        for (int Line = 0; Line < mirorArray.GetLength(1); Line++) {
+                            if (mirorArray[checkPos, Line] != mirorArray[checkNeg, Line]) {
+                                if (correctedSmudge) {
+                                    return false;                                                                        
+                                }
+                                correctedSmudge = true;                                
+                            }
                         }
-                    }
 
-                    distFromReflect++;
-                    checkPos = (int)(ReflectPos + distFromReflect);
-                    checkNeg = (int)(ReflectPos - distFromReflect);
+                        distFromReflect++;
+                        checkPos = (int)(ReflectPos + distFromReflect);
+                        checkNeg = (int)(ReflectPos - distFromReflect);
 
-                } while (checkPos < mirorArray.GetLength(1) && checkNeg >= 0);
+                    } while (checkPos < mirorArray.GetLength(0) && checkNeg >= 0);
+                    if (!correctedSmudge) { return false; } //didn't actually correct a smudge
+                }
+                else {
+                    do {
+                        for (int Line = 0; Line < mirorArray.GetLength(0); Line++) {
+                            if (mirorArray[Line, checkPos] != mirorArray[Line, checkNeg]) {
+                                if (correctedSmudge) {
+                                    return false;
+                                }
+                                correctedSmudge = true;
+                            }
+                        }
 
+                        distFromReflect++;
+                        checkPos = (int)(ReflectPos + distFromReflect);
+                        checkNeg = (int)(ReflectPos - distFromReflect);
+
+                    } while (checkPos < mirorArray.GetLength(1) && checkNeg >= 0);
+                    if (!correctedSmudge) { return false; } //didn't actually correct a smudge
+                }
             }
 
             return true; //maybe i guess might work???
@@ -127,7 +170,7 @@ namespace CodeTAF
         }
 
         void part2() {
-
+            part1();
         }
 
         void Update() {
