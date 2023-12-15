@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CodeTAF
 {
@@ -16,11 +17,19 @@ namespace CodeTAF
         [SerializeField]
         private bool run = false;
         private string input;
+        [SerializeField]
+        private bool doSteps = false;
+
+        int curLine = 0;        
+        DateTime startTime;
 
 
         const char ROCK_ROUND = 'O';
         const char ROCK_CUBE = '#';
         const char EMPTY_SPOT = '.';
+        const int TARGET_CYCLES_AMT = 1000;
+
+        char[,] platformMap;
 
 
 
@@ -70,28 +79,94 @@ namespace CodeTAF
         }
 
         char[,] TiltDown(char[,] platformMap) {
+            int platformMaxX = platformMap.GetLength(0);
+            int platformMaxY = platformMap.GetLength(1);
+
+            for (int row = 0; row < platformMaxY; row++) {
+                for (int col = 0; col < platformMaxX; col++) {
+                    //found round rock.                    
+                    if (platformMap[col, row] == ROCK_ROUND) {                        
+                        for (int i = (row - 1); i >= 0; i--) {
+                            if (platformMap[col, i] != EMPTY_SPOT) {
+                                //found rock above                                
+                                platformMap[col, row] = EMPTY_SPOT;
+                                platformMap[col, i + 1] = ROCK_ROUND;
+                                break;
+                            }
+                            else if (i == (0)) {
+                                platformMap[col, row] = EMPTY_SPOT;
+                                platformMap[col, i] = ROCK_ROUND;
+                            }
+                        }
+                    }
+                }
+            }
+
             return platformMap;
         }
 
         char[,] TiltRight(char[,] platformMap) {
+            int platformMaxX = platformMap.GetLength(0);
+            int platformMaxY = platformMap.GetLength(1);
+
+            for (int row = 0; row < platformMaxY; row++) {
+                for (int col = platformMaxX - 1; col >= 0; col--) {
+                    //found round rock.                    
+                    if (platformMap[col, row] == ROCK_ROUND) {
+                        //print("FOUND ROCK");
+                        for (int i = (col + 1); i < platformMaxY; i++) {
+                            if (platformMap[i, row] != EMPTY_SPOT) {
+                                //found rock above                                
+                                platformMap[col, row] = EMPTY_SPOT;
+                                platformMap[i - 1, row] = ROCK_ROUND;
+
+                                break;
+                            }
+                            else if (i == (platformMaxY - 1)) {
+                                platformMap[col, row] = EMPTY_SPOT;
+                                platformMap[i, row] = ROCK_ROUND;
+                            }
+                        }
+                    }
+                }
+            }
+
             return platformMap;
         }
 
         char[,] TiltLeft(char[,] platformMap) {
-            return platformMap;
-        }
-        //this might just be unnecessary
-        char[,] TiltPlatform(char[,] platformMap, Vector2Int tiltDir) {
-            
+            int platformMaxX = platformMap.GetLength(0);
+            int platformMaxY = platformMap.GetLength(1);
 
-            if (tiltDir == Vector2Int.up || tiltDir == Vector2Int.down) {
-                platformMap = (tiltDir == Vector2Int.up) ? TiltUp(platformMap) : TiltDown(platformMap);
-            }            
-            else {
-                platformMap = (tiltDir == Vector2Int.right) ? TiltRight(platformMap) : TiltLeft(platformMap);
+            for (int row = 0; row < platformMaxY; row++) {
+                for (int col = 0; col < platformMaxX; col++) {
+                    //found round rock.                    
+                    if (platformMap[col, row] == ROCK_ROUND) {
+                        for (int i = (col - 1); i >= 0; i--) {
+                            if (platformMap[i, row] != EMPTY_SPOT) {
+                                //found rock above                                
+                                platformMap[col, row] = EMPTY_SPOT;
+                                platformMap[i + 1, row] = ROCK_ROUND;
+                                break;
+                            }
+                            else if (i == (0)) {
+                                platformMap[col, row] = EMPTY_SPOT;
+                                platformMap[i, row] = ROCK_ROUND;
+                            }
+                        }
+                    }
+                }
             }
 
             return platformMap;
+        }
+        //this might just be unnecessary
+        char[,] TiltCycle(char[,] platformMap) {
+
+            platformMap = TiltUp(platformMap);
+            platformMap = TiltLeft(platformMap);
+            platformMap = TiltDown(platformMap);
+            return TiltRight(platformMap);            
         }
 
         void PrintMap(char[,] chars) {
@@ -148,6 +223,22 @@ namespace CodeTAF
         
 
         void part2() {
+            char[,] platformMap = ParseInput(input.Split("\r\n"));         
+
+            for (int i = 0; i < TARGET_CYCLES_AMT; i++) {
+                platformMap = TiltCycle(platformMap);
+            }
+
+            print($"Total Load = {GetTotalLoad(platformMap)}");
+
+
+        }
+
+        private void Start() {
+            curLine = 0;
+            doSteps = false;
+            
+            platformMap = ParseInput(Input().Split("\r\n"));
 
         }
 
@@ -159,13 +250,32 @@ namespace CodeTAF
                 if (useTestInput) { input = InputTest(); }
                 else { input = Input(); }
 
-                var startTime = System.DateTime.Now;
-                if (partTwo) { part2(); }
+                startTime = System.DateTime.Now;
+                if (partTwo) {
+                    //part2();
+                    curLine = 0;                    
+                    doSteps = true;
+                }
                 else { part1(); }
                 print($"Took {System.DateTime.Now - startTime} to complete.");
-            }
-        }
 
+            }
+
+            if (doSteps) {
+                platformMap = TiltCycle(platformMap);
+                //print(curLine);
+                print(GetTotalLoad(platformMap));
+                if (++curLine %1000000 == 0) {
+                    print($"DONE %{(curLine*100)/TARGET_CYCLES_AMT} of Cycles");
+                    //print($"Took {System.DateTime.Now - startTime} to complete.");
+                }
+                if (curLine == TARGET_CYCLES_AMT) {
+                    print($"Total Load = {GetTotalLoad(platformMap)}");
+                    doSteps = false;
+                    print($"Took {System.DateTime.Now - startTime} to complete.");
+                }                
+            }
+        }        
 
         string InputTest() {
             return
