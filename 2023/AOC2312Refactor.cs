@@ -1,15 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace CodeTAF
 {
-    public class AOC2312 : MonoBehaviour
-    {        
+    public class AOC2312Refactor : MonoBehaviour
+    {
         [SerializeField]
         private bool partTwo = false;
         [SerializeField]
@@ -31,6 +30,9 @@ namespace CodeTAF
         long totalValidCombos;
 
 
+        Dictionary<string, long> cache;
+
+
         bool isPossible(string springs, int[] brokenGroups) {
 
             //if (springs.Count(c => c == SPRING_BROKEN) != brokenGroups.Sum()) { return false; }
@@ -38,70 +40,159 @@ namespace CodeTAF
             List<int> testGroup = new List<int>();
             int groupSize = 0;
             for (int spring = 0; spring < springs.Length; spring++) {
-                if (springs[spring] == SPRING_BROKEN) { 
-                    groupSize++; 
-                    continue; 
+                if (springs[spring] == SPRING_BROKEN) {
+                    groupSize++;
+                    continue;
                 }
                 if (groupSize == 0) { continue; }
 
                 testGroup.Add(groupSize);
                 groupSize = 0;
-            }            
+            }
             if (groupSize > 0) { testGroup.Add(groupSize); }
 
-            if (testGroup.Count != brokenGroups.Length) { return false; }            
+            if (testGroup.Count != brokenGroups.Length) { return false; }
             for (int i = 0; i < testGroup.Count; i++) {
                 if (testGroup[i] != brokenGroups[i]) { return false; }
-            }           
+            }
 
             return true;
         }
 
         string GetCombo(string springs, string binaryKey) {
-            
+
             for (int key = 0; key < binaryKey.Length; key++) {
                 char replacement = (binaryKey[key] == '1') ? SPRING_WORKING : SPRING_BROKEN;
-                int indexReplace = springs.IndexOf(SPRING_UNK);                
-                springs = springs.Remove(indexReplace,1).Insert(indexReplace, replacement.ToString());
+                int indexReplace = springs.IndexOf(SPRING_UNK);
+                springs = springs.Remove(indexReplace, 1).Insert(indexReplace, replacement.ToString());
             }
             return springs;
         }
 
+        // old for part 1
         long CheckAll(string springs, int[] brokenGroups) {
 
             int knownBroken = springs.Count(c => c == SPRING_BROKEN);
 
             int amtUnknowns = springs.Count(c => c == SPRING_UNK);
-            
+
             long amtCombos = (long)math.pow(2, amtUnknowns);
             //print(amtCombos);
             long validCombos = 0;
 
             for (long i = 0; i < amtCombos; i++) {
-                string binary = Convert.ToString(i, 2);                
+                string binary = Convert.ToString(i, 2);
 
                 int addZeros = (amtUnknowns - binary.Length);
-                for (int j = 0; j < addZeros; j++) {                    
+                for (int j = 0; j < addZeros; j++) {
                     binary = "0" + binary;
                 }
-                
+
                 if ((binary.Count(c => c == '0') + knownBroken) != brokenGroups.Sum()) { continue; }
 
-                if (isPossible(GetCombo(springs, binary),brokenGroups)) {                    
+                if (isPossible(GetCombo(springs, binary), brokenGroups)) {
                     validCombos++;
-                }                
+                }
             }
 
             return validCombos;
         }
-        
+
+
+        //refactored for part 2
+        long CheckAll(string springs, List<int> brokenGroups) {
+
+            string cacheKey = springs;
+            for (int i = 0; i < brokenGroups.Count; i++) {
+                cacheKey += " " + brokenGroups[i];
+            }
+
+            //print(cacheKey);
+            if (cache.ContainsKey(cacheKey)) {
+                print("has Cache");
+                return cache[cacheKey];                
+            }
+
+            print($"Trying: {cacheKey}");
+            long amountPossible = GetPossible(springs, brokenGroups);
+            cache.Add(cacheKey, amountPossible);
+
+            return amountPossible;
+        }
+
+
+
+
+        long GetPossible(string springs, List<int> broken) {
+
+            List<int> brokenGroups = broken;
+
+            while (true) {               
+
+                if (brokenGroups.Count == 0) { print($"Combo END: possible = {!springs.Contains(SPRING_BROKEN)}"); return springs.Contains(SPRING_BROKEN) ? 0 : 1; }
+                if (string.IsNullOrEmpty(springs)) { print("Combo Fail Reason: springs is null or empty");  return 0; }
+
+                char curSpring = springs[0];
+
+                switch (curSpring) {
+                    case SPRING_WORKING:
+                        springs = springs.Trim(SPRING_WORKING); //may need change but trims front and back .
+                        continue;
+                    case SPRING_UNK:
+                        print("Combo Unk Checking!!");
+                        return CheckAll(SPRING_BROKEN + springs[1..], brokenGroups) + CheckAll(SPRING_WORKING + springs[1..], brokenGroups);
+                    case SPRING_BROKEN:
+                        /*
+                        bool moreGroups = (brokenGroups.Count > 1);                        
+                        if (springs.Length < brokenGroups[0] || //not enough left for the target group
+                            springs[..brokenGroups[0]].Contains(SPRING_WORKING) || //group is broken up with working spring in the middle so bad. 
+                            moreGroups && springs.Length < brokenGroups[0] + 1 || //if more groups after this and there is no more springs left then bad
+                            moreGroups && springs[brokenGroups[0]] == SPRING_BROKEN) //if more groups after this and the next spring after group is another broken spring which is bad. 
+                        {
+                            return 0; 
+                        }
+                        */
+
+                        //not enough left for the target group or group is broken up with working spring in the middle so bad.   
+                        if (springs.Length < brokenGroups[0] || springs[..brokenGroups[0]].Contains(SPRING_WORKING)) {
+                            print("Combo Fail Reason: not long enough or working spring in middle of it.");
+                            return 0;
+                        }
+
+                        if (brokenGroups.Count > 1) { //if more groups after this
+                            if (springs.Length < brokenGroups[0] + 1 || springs[brokenGroups[0]] == SPRING_BROKEN) { //there is no more springs left then bad or 
+                                //the next spring after group is another broken spring which is bad.
+                                print("Combo Fail Reason: More groups and not springs left or another broken is at the end which invalid");
+                                return 0;
+                            }
+
+
+                            springs = springs[(brokenGroups[0] + 1)..];
+                            //brokenGroups = new List<int> { brokenGroups[1..] };
+                            brokenGroups.RemoveAt(0);
+                            continue;
+
+                        }
+                        
+
+                        springs = springs[brokenGroups[0]..];
+                        //springs = moreGroups ? springs[(brokenGroups[0] + 1)..] : springs[brokenGroups[0]..];
+                        brokenGroups.RemoveAt(0);
+
+                        
+                        continue;
+                }
+            } 
+
+        } 
+
         
         void part1() {
- 
+
             string[] house = input.Split("\r\n");
             string[] parts;
             List<List<int>> amountsBroken = new List<List<int>>();
-            List<string> springs = new List<string>();
+            List<string> springs = new List<string>();            
             string[] nums;
 
             for (int i = 0; i < house.Length; i++) {
@@ -109,10 +200,10 @@ namespace CodeTAF
 
                 parts = house[i].Split(" ");
                 springs.Add(parts[0]);
-                nums = parts[1].Split(",");                
+                nums = parts[1].Split(",");
                 for (int j = 0; j < nums.Length; j++) {
-                    amountsBroken[i].Add(int.Parse(nums[j]));                                    
-                }               
+                    amountsBroken[i].Add(int.Parse(nums[j]));
+                }
             }
 
             long totalValidCombos = 0;
@@ -125,7 +216,8 @@ namespace CodeTAF
 
         }
 
-        void part2() {
+        void part2() {            
+
             string[] house = input.Split("\r\n");
             string[] parts;
             //List<List<int>> amountsBroken = new List<List<int>>();
@@ -133,6 +225,7 @@ namespace CodeTAF
 
             amountsBroken.Clear();
             springs.Clear();
+            cache.Clear();
 
             string[] nums;
 
@@ -148,7 +241,7 @@ namespace CodeTAF
             }
 
             //unfolding
-            const int UNFOLD_AMT = 5 - 1;
+            const int UNFOLD_AMT = 1 - 1;
 
 
             for (int line = 0; line < springs.Count; line++) {
@@ -156,8 +249,8 @@ namespace CodeTAF
                 string addString = SPRING_UNK + springs[line];
                 for (int i = 0; i < UNFOLD_AMT; i++) {
                     springs[line] += addString;
-                    amountsBroken[line].AddRange(addInts);                    
-                }                
+                    amountsBroken[line].AddRange(addInts);
+                }
             }
 
 
@@ -178,17 +271,20 @@ namespace CodeTAF
         }
 
 
-        void checkNextLine(int line) {            
-            totalValidCombos += CheckAll(springs[line], amountsBroken[line].ToArray());
+        void checkNextLine(int line) {
+            long prevTotal = totalValidCombos;
+            totalValidCombos += CheckAll(springs[line], amountsBroken[line]);
+            print(totalValidCombos - prevTotal);
         }
 
         private void Start() {
             curLine = 0;
             doSteps = false;
-            
+
 
             amountsBroken = new List<List<int>>();
             springs = new List<string>();
+            cache = new Dictionary<string, long>();
         }
 
         void Update() {
@@ -200,25 +296,25 @@ namespace CodeTAF
                 else { input = Input(); }
 
                 startTime = System.DateTime.Now;
-                if (partTwo) { 
+                if (partTwo) {
                     part2();
                     curLine = 0;
                     totalValidCombos = 0;
-                    doSteps = true;                    
+                    doSteps = true;
                 }
                 else { part1(); }
                 print($"Took {System.DateTime.Now - startTime} to complete.");
-                
+
             }
 
             if (doSteps) {
                 checkNextLine(curLine);
                 print("DONE: Line " + curLine);
-                if (++curLine ==  springs.Count) {
+                if (++curLine == springs.Count) {
                     print($"Total Possible Valid Combos = {totalValidCombos}");
                     doSteps = false;
                     print($"Took {System.DateTime.Now - startTime} to complete.");
-                }                
+                }
                 //print($"Took {System.DateTime.Now - startTime} to complete.");
             }
         }
