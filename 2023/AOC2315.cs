@@ -1,5 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
 using UnityEngine;
 
 namespace CodeTAF
@@ -46,7 +49,64 @@ namespace CodeTAF
 
         void part2() {
 
-        }
+
+            string[] hashList = input.Split(",");            
+
+            List<string>[] lensBoxes = new List<string>[256];
+            List<int>[] focusBoxes = new List<int>[256];  
+            
+            for (int i = 0; i < lensBoxes.Length; i++) {
+                lensBoxes[i] = new List<string>();
+                focusBoxes[i] = new List<int>();
+            }
+
+
+            for (int seqCount = 0; seqCount < hashList.Length; seqCount++) {
+
+                string labelHash;
+                int targetBox;
+                string existingLabel;
+                int focusLen;
+                if (hashList[seqCount].Contains('=')) {
+                    
+                    labelHash = hashList[seqCount].Split('=')[0];
+                    focusLen = int.Parse(hashList[seqCount].Split('=')[1]);
+                    targetBox = HashString(labelHash);
+                    //print(labelHash);
+                    //print(label);
+
+                    if (lensBoxes[targetBox].Contains(labelHash)) {                        
+                        focusBoxes[targetBox][lensBoxes[targetBox].IndexOf(labelHash)] = focusLen;
+                        continue;
+                    }
+
+                    lensBoxes[targetBox].Add(labelHash);
+                    focusBoxes[targetBox].Add(focusLen);
+                    continue;                    
+                }
+
+                labelHash = hashList[seqCount].Split('-')[0];
+                targetBox = HashString(labelHash);
+
+                if (lensBoxes[targetBox].Contains(labelHash)) {
+                    int theIndex = lensBoxes[targetBox].IndexOf(labelHash);
+                    focusBoxes[targetBox].RemoveAt(theIndex);
+                    lensBoxes[targetBox].RemoveAt(theIndex);                    
+                }
+            }
+
+            int resultTotal = 0;            
+
+            for (int curBox = 0;  curBox < lensBoxes.Length; curBox++) {
+                for (int lens = 0; lens < lensBoxes[curBox].Count; lens++) {                   
+
+                    resultTotal += ((curBox + 1) * (lens + 1) * focusBoxes[curBox][lens]);
+                }
+            }
+
+            print($"Result Total = {resultTotal}");
+        }   
+
 
         void Update() {
             if (run) {
