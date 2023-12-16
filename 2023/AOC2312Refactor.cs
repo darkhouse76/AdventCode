@@ -108,11 +108,11 @@ namespace CodeTAF
 
             //print(cacheKey);
             if (cache.ContainsKey(cacheKey)) {
-                print("has Cache");
+                //print("has Cache");
                 return cache[cacheKey];                
             }
 
-            print($"Trying: {cacheKey}");
+            //print($"Trying: {cacheKey}");
             long amountPossible = GetPossible(springs, brokenGroups);
             cache.Add(cacheKey, amountPossible);
 
@@ -124,12 +124,12 @@ namespace CodeTAF
 
         long GetPossible(string springs, List<int> broken) {
 
-            List<int> brokenGroups = broken;
+            List<int> brokenGroups = new List<int>(broken);
 
             while (true) {               
 
-                if (brokenGroups.Count == 0) { print($"Combo END: possible = {!springs.Contains(SPRING_BROKEN)}"); return springs.Contains(SPRING_BROKEN) ? 0 : 1; }
-                if (string.IsNullOrEmpty(springs)) { print("Combo Fail Reason: springs is null or empty");  return 0; }
+                if (brokenGroups.Count == 0) { return springs.Contains(SPRING_BROKEN) ? 0 : 1; }
+                if (string.IsNullOrEmpty(springs)) { return 0; }
 
                 char curSpring = springs[0];
 
@@ -138,7 +138,7 @@ namespace CodeTAF
                         springs = springs.Trim(SPRING_WORKING); //may need change but trims front and back .
                         continue;
                     case SPRING_UNK:
-                        print("Combo Unk Checking!!");
+                        //print("Combo Unk Checking!!");
                         return CheckAll(SPRING_BROKEN + springs[1..], brokenGroups) + CheckAll(SPRING_WORKING + springs[1..], brokenGroups);
                     case SPRING_BROKEN:
                         /*
@@ -154,14 +154,14 @@ namespace CodeTAF
 
                         //not enough left for the target group or group is broken up with working spring in the middle so bad.   
                         if (springs.Length < brokenGroups[0] || springs[..brokenGroups[0]].Contains(SPRING_WORKING)) {
-                            print("Combo Fail Reason: not long enough or working spring in middle of it.");
+                            //print("Combo Fail Reason: not long enough or working spring in middle of it.");
                             return 0;
                         }
 
                         if (brokenGroups.Count > 1) { //if more groups after this
                             if (springs.Length < brokenGroups[0] + 1 || springs[brokenGroups[0]] == SPRING_BROKEN) { //there is no more springs left then bad or 
                                 //the next spring after group is another broken spring which is bad.
-                                print("Combo Fail Reason: More groups and not springs left or another broken is at the end which invalid");
+                                //print("Combo Fail Reason: More groups and not springs left or another broken is at the end which invalid");
                                 return 0;
                             }
 
@@ -240,7 +240,7 @@ namespace CodeTAF
             }
 
             //unfolding
-            const int UNFOLD_AMT = 1 - 1;
+            const int UNFOLD_AMT = 5 - 1;
 
 
             for (int line = 0; line < springs.Count; line++) {
@@ -253,7 +253,7 @@ namespace CodeTAF
             }
 
 
-            print(springs[0]);
+            //print(springs[0]);
             //for (int i = 0; i < amountsBroken[0].Count; i++) {
             //print(amountsBroken[0][i]);
             //}
@@ -273,7 +273,7 @@ namespace CodeTAF
         void checkNextLine(int line) {
             long prevTotal = totalValidCombos;
             totalValidCombos += CheckAll(springs[line], amountsBroken[line]);
-            print(totalValidCombos - prevTotal);
+            //print(totalValidCombos - prevTotal);
         }
 
         private void Start() {
