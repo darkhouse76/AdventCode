@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using static UnityEditor.Searcher.SearcherWindow.Alignment;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 namespace CodeTAF
 {
@@ -165,7 +167,46 @@ namespace CodeTAF
         }
 
         void part2() {
+            char[,] mirrorMap = ParseInput(input);
+            int mirrorMaxX = mirrorMap.GetLength(0);
+            int mirrorMaxY = mirrorMap.GetLength(1);
+            bool[,] energizeMap = new bool[mirrorMaxX, mirrorMaxY];
+            //bool[,] HighestEnergizeMap = new bool[mirrorMap.GetLength(0), mirrorMap.GetLength(1)];
 
+            energizeMap = SetMapCondition<bool>(energizeMap, false); //resets the map to false;
+
+            //PrintMap(mirrorMap);
+            
+            int highestEnergizeConfig = 0;
+            int amtEnergize;            
+
+            for (int row = 0;  row < mirrorMaxY;  row++) {
+                //from left
+                energizeMap = SetMapCondition<bool>(energizeMap, false); //resets the map to false;
+                amtEnergize = AmountEnergized(FireLaser(energizeMap, mirrorMap, new Vector2Int(0, row), Vector2Int.right, true));
+                highestEnergizeConfig = math.max(highestEnergizeConfig,amtEnergize);
+
+                //from right
+                energizeMap = SetMapCondition<bool>(energizeMap, false); //resets the map to false;
+                amtEnergize = AmountEnergized(FireLaser(energizeMap, mirrorMap, new Vector2Int(mirrorMaxX - 1, row), Vector2Int.left, true));
+                highestEnergizeConfig = math.max(highestEnergizeConfig, amtEnergize);
+            }
+
+            for (int col = 0; col < mirrorMaxX; col++) {
+                //from up
+                energizeMap = SetMapCondition<bool>(energizeMap, false); //resets the map to false;
+                amtEnergize = AmountEnergized(FireLaser(energizeMap, mirrorMap, new Vector2Int(col, mirrorMaxY - 1), Vector2Int.down, true));
+                highestEnergizeConfig = math.max(highestEnergizeConfig, amtEnergize);
+
+                //from down
+                energizeMap = SetMapCondition<bool>(energizeMap, false); //resets the map to false;
+                amtEnergize = AmountEnergized(FireLaser(energizeMap, mirrorMap, new Vector2Int(col, 0), Vector2Int.up, true));
+                highestEnergizeConfig = math.max(highestEnergizeConfig, amtEnergize);
+            }
+
+
+            print("----------------------------------------------------------------");
+            print($"Highest Total Tiles Energized = {highestEnergizeConfig}");
         }
 
         void Update() {
