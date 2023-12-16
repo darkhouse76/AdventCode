@@ -79,9 +79,7 @@ namespace CodeTAF
             return new Vector2Int(startDir.y  * dirMod,startDir.x * dirMod);
         }
 
-        bool[,] FireLaser(bool[,] energizeMap, char[,] mirrorMap, Vector2Int curLoc, Vector2Int startDir, bool firstLaser = false) {
-            //if (curLoc == null) { curLoc = new Vector2Int(0, mirrorMap.GetLength(1)-1); }
-            //if (startDir == null) { startDir = Vector2Int.right; }
+        bool[,] FireLaser(bool[,] energizeMap, char[,] mirrorMap, Vector2Int curLoc, Vector2Int startDir, bool firstLaser = false) {           
 
             //if first one then sets it back one for the sake of simple.
             if (firstLaser) { curLoc -= startDir; }
@@ -97,15 +95,13 @@ namespace CodeTAF
                 curLoc += startDir;                
                 //check if out of bounds;
                 if (curLoc.x < 0 || curLoc.x >= maxX) { return energizeMap; }
-                if (curLoc.y < 0 || curLoc.y >= maxY) { return energizeMap; }
-                //mark the pos energized;                
+                if (curLoc.y < 0 || curLoc.y >= maxY) { return energizeMap; }                              
                 
                 switch (mirrorMap[curLoc.x,curLoc.y]) {
                     case EMPTY_SPACE:
                         energizeMap[curLoc.x, curLoc.y] = true;
                         break;
-                    case MIRROR_HORZIONTAL:
-                        //print("Horziontal");
+                    case MIRROR_HORZIONTAL:                        
                         if (startDir == Vector2Int.left || startDir == Vector2Int.right) {
                             energizeMap[curLoc.x, curLoc.y] = true;
                             break; 
@@ -114,8 +110,7 @@ namespace CodeTAF
                         if (energizeMap[curLoc.x, curLoc.y]) { return energizeMap; }
                         energizeMap[curLoc.x, curLoc.y] = true;
                         return FireLaser(FireLaser(energizeMap, mirrorMap, curLoc, Vector2Int.left), mirrorMap,curLoc,Vector2Int.right);                        
-                    case MIRROR_VERTICAL:
-                        //print("Vertical");
+                    case MIRROR_VERTICAL:                        
                         if (startDir == Vector2Int.up || startDir == Vector2Int.down) {                            
                             energizeMap[curLoc.x, curLoc.y] = true;
                             break; 
@@ -124,12 +119,10 @@ namespace CodeTAF
                         if (energizeMap[curLoc.x, curLoc.y]) { return energizeMap; }                        
                         energizeMap[curLoc.x, curLoc.y] = true;                        
                         return FireLaser(FireLaser(energizeMap, mirrorMap, curLoc, Vector2Int.up), mirrorMap, curLoc, Vector2Int.down);                        
-                    case MIRROR_ANGLE_RIGHT:
-                        //print("Angle Right");
+                    case MIRROR_ANGLE_RIGHT:                        
                         energizeMap[curLoc.x, curLoc.y] = true;
                         return FireLaser(energizeMap, mirrorMap, curLoc, GetNewAngle(startDir, true));
-                    case MIRROR_ANGLE_LEFT:
-                        //print("Angle Left");
+                    case MIRROR_ANGLE_LEFT:                        
                         energizeMap[curLoc.x, curLoc.y] = true;
                         return FireLaser(energizeMap, mirrorMap, curLoc, GetNewAngle(startDir, false));
                 }
@@ -164,11 +157,10 @@ namespace CodeTAF
 
             energizeMap = SetMapCondition<bool>(energizeMap, false);
 
-		    //PrintMap(mirrorMap);
-
+		    PrintMap(mirrorMap);
             energizeMap = FireLaser(energizeMap, mirrorMap, new Vector2Int(0, mirrorMap.GetLength(1)-1), Vector2Int.right, true);
-            //energizeMap = FireLaser(energizeMap, mirrorMap, new Vector2Int(1,2), Vector2Int.down, true);
-            print($"Total Tiles Energized = {AmountEnergized(energizeMap,false)}");
+            print("----------------------------------------------------------------");
+            print($"Total Tiles Energized = {AmountEnergized(energizeMap,true)}");
 
         }
 
