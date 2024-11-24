@@ -34,7 +34,22 @@ namespace CodeTAF
         }
 
         void part2() {
+            string[] lines = input.Split("\r\n");
+            int[] depths = AocLib.GetIntNumbers(lines);
 
+            int lastDepth = depths[0] + depths[1] + depths[2];
+            int numIncrease = 0;
+
+            for (int i = 0; i < (depths.Length - 3); i++) {
+                //print(depths[i]);
+                int commonDepth = depths[i+1] + depths[i+2];
+                int curDepth = depths[i] + commonDepth;
+                int nextDepth = depths[i + 3] + commonDepth;
+
+                if (nextDepth > curDepth) { numIncrease++; }                
+            }
+
+            print($"Number of increase in depth = {numIncrease}");
         }
 
         void Update() {
