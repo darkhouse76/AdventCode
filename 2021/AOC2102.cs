@@ -100,7 +100,32 @@ namespace CodeTAF
         }
 
         void part2() {
-            
+            string[] lines = input.Split(new[] { "\r\n", " " }, StringSplitOptions.None);
+
+            int curAim = 0;
+            int curDepth = 0;
+            int curHorizontal = 0;
+
+            for (int i = 0; i < lines.Length; i += 2) {                
+                int units = int.Parse(lines[i + 1]);
+
+                switch (lines[i]) {
+                    case "forward":
+                        curHorizontal += units;
+                        curDepth += (curAim * units);
+                        break;
+
+                    case "up":
+                        units *= -1;
+                        goto case "down";
+
+                    case "down":
+                        curAim += units;
+                        break;
+                }
+            }
+
+            print($"Final position is Horizontal = {curHorizontal} Depth = {curDepth} Total = {curHorizontal * curDepth}");
 
         }
 
