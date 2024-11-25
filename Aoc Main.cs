@@ -16,7 +16,7 @@ namespace CodeTAF
         private bool run = false;
         private string input;
 
-        private string inputFolderName = "inputs";
+        private readonly string inputFolderName = "inputs";
 
 
         string rootPath {
