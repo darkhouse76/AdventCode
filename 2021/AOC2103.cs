@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -58,6 +59,10 @@ namespace CodeTAF
             }
         }
 
+
+
+
+
         void part1() {
 
             string[] lines = input.Split("\r\n");
@@ -102,8 +107,49 @@ namespace CodeTAF
 
         }
 
-        void part2() {
+        char getMostCommon(int curBit, List<string> bitLines) {
+            
+            int numON = 0;
+            int numOFF = 0;
 
+            foreach (string line in bitLines) {
+                if (line[curBit] == '1') { numON++; }
+                else { numOFF++; }
+            }
+
+            if (numON == numOFF) { return '1'; }
+            return (numON > numOFF) ? '1' : '0';
+        }
+
+        List<string> filterRates(int curBit, char targetBit, List<string> bitLines) {
+
+            List<string> filterLines = new List<string>();            
+
+            for (int i = 0; i < bitLines.Count; i++) { 
+                if (bitLines[i][curBit] == targetBit) { filterLines.Add(bitLines[i]); }
+            }
+            return filterLines;
+        }
+
+        void part2() {
+            string[] lines = input.Split("\r\n");            
+
+            var oxyGen = new List<string>(lines);
+            var co2 = new List<string>(lines);
+
+
+            for (int i = 0; i < lines[0].Length; i++ ) {
+                if (oxyGen.Count > 1) { oxyGen = filterRates(i, getMostCommon(i, oxyGen), oxyGen); }
+                if (co2.Count > 1) { co2 = filterRates(i, (getMostCommon(i, co2) == '1' ? '0': '1'), co2); }   
+            }
+
+            int oxyGenRate = Convert.ToInt32(oxyGen[0], 2);
+            int co2Rate = Convert.ToInt32(co2[0], 2);    
+
+
+            print($"Oxygen Rate = {oxyGen[0]} = {oxyGenRate}");
+            print($"CO2 Scrubber Rate = {co2[0]} = {co2Rate}");
+            print($"Life Support Rate = {oxyGenRate * co2Rate}");
 
         }
 
