@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -58,7 +59,54 @@ namespace CodeTAF
             }
         }
 
+        class line {
+
+            public static int maxX;
+            public static int maxY;
+
+            int X1 { get; set; }
+            int Y1 { get; set; }
+            int X2 { get; set; }
+            int Y2 { get; set; }
+            bool isHorizontalVertical { get; set; }
+
+            public line(int x1, int y1, int x2, int y2) {
+
+                isHorizontalVertical = (x1 == x2 || y1 == y2) ? true : false;
+
+                X1 = x1;
+                Y1 = y1;
+                X2 = x2;
+                Y2 = y2;
+
+                if (x1 > maxX) { maxX =  x1; }
+                if (x2 > maxX) { maxX = x2; }
+
+                if (y1 > maxY) { maxY = y1; }
+                if (y2 > maxY) { maxY = y2; }  
+            }
+        }
+
+
         void part1() {
+            string[] cords = input.Split(new string[] { "\r\n", " -> ", ","}, StringSplitOptions.RemoveEmptyEntries);
+
+            int[] cordsNum = Array.ConvertAll(cords, int.Parse);
+
+            line.maxX = 0;
+            line.maxY = 0;
+            List<line> allLines = new List<line>();
+
+            for (int i = 0; i < cordsNum.Length; i+= 4) {
+                allLines.Add(new line(cordsNum[i], cordsNum[i + 1], cordsNum[i + 2], cordsNum[i + 3]));
+            }
+
+            print(allLines.Count);
+
+            print($"Map size =  ({line.maxX} X {line.maxY})");
+            
+            
+            //for (int i = 0; i < cords.Length; i++) { print(cords[i]); }
 
 
         }
