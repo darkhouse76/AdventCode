@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace CodeTAF
 {
-    public class AocMain : MonoBehaviour
+    public class AOC2105 : MonoBehaviour
     {
         [SerializeField]
         private bool partTwo = false;
@@ -58,13 +58,13 @@ namespace CodeTAF
             }
         }
 
-        void part1() {            
+        void part1() {
 
 
         }
 
         void part2() {
-            
+
 
         }
 
