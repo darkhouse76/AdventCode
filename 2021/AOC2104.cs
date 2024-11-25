@@ -63,7 +63,8 @@ namespace CodeTAF
 
             (int, bool)[,] boardState;
 
-            int[] boardNumbers;         
+            int[] boardNumbers;    
+            bool hasWon = false;
 
             public int UnmarkedScore { get; set; }
             
@@ -82,7 +83,10 @@ namespace CodeTAF
             }
 
             public bool markNumber(int targetNum) {
-                
+                if (hasWon) {
+                    return false;
+                }
+
                 if (!Array.Exists(boardNumbers, element => element == targetNum)) {
                     return false;
                 }
@@ -96,8 +100,8 @@ namespace CodeTAF
                         }
                     }
                 }
-                
-                return checkIfWinningState();
+                hasWon = checkIfWinningState();
+                return hasWon;
             }
 
             private bool checkIfWinningState() {
@@ -170,7 +174,36 @@ namespace CodeTAF
         }
 
         void part2() {
+            string[] lines = input.Split(new string[] { "\r\n", " " }, StringSplitOptions.RemoveEmptyEntries);            
 
+            //get numbers to mark in order
+            int[] callNums = Array.ConvertAll(lines[0].Split(","), int.Parse);
+
+            //create all boards
+            List<board> allBoards = new List<board>();
+
+            for (int i = 1; i < lines.Length; i += 25) {
+
+                string[] curBoardNum = new string[25];
+                Array.Copy(lines, i, curBoardNum, 0, 25);;
+
+                allBoards.Add(new board(Array.ConvertAll(curBoardNum, int.Parse)));
+            }
+
+            int numOfWinners = 0;
+
+            for (int i = 0; i < callNums.Length; i++) {
+
+                foreach (board curBoard in allBoards) {
+
+                    if (curBoard.markNumber(callNums[i])) {
+                        //board has won
+
+                        print($"Board WON! last number called = {callNums[i]} ||| Final Score = {curBoard.UnmarkedScore * callNums[i]}");                        
+                    }
+                }
+                
+            }
 
         }
 
