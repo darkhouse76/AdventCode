@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -58,9 +59,57 @@ namespace CodeTAF
             }
         }
 
-        void part1() {
-            //bob
 
+        class fish
+        {
+            int SpawnTimer { get; set; }
+            public fish LastChild { get; set; }
+
+            public fish() {
+                SpawnTimer = 8;
+            }
+
+            public fish(int customStartTimer) {
+                SpawnTimer = customStartTimer;
+            }
+
+            public bool nextDay() {
+                if (SpawnTimer-- == 0) {
+                    LastChild = new fish();
+                    SpawnTimer = 6;
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        int[] parseInput() {
+            string[] startFishTimers = input.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+            return Array.ConvertAll(startFishTimers, int.Parse);
+
+        } 
+
+
+        void part1() {
+
+            int[] startFishTimers = parseInput();
+            List<fish> allFish = new();
+            int numDays = 80; //number of days to goto
+
+            for (int i = 0; i < startFishTimers.Length; i++) {
+                //print(startFishTimers[i]);
+                allFish.Add(new fish(startFishTimers[i]));
+            }         
+
+            for (int i = 0; i < numDays; i++) {
+                List<fish> newFish = new();
+                foreach (fish curFish in allFish) { 
+                    if (curFish.nextDay()) { newFish.Add(curFish.LastChild); }
+                }
+                if (newFish.Count > 0) { allFish.AddRange(newFish); }
+            }
+
+            print($"Total number of fish after {numDays} days = {allFish.Count}");
         }
 
         void part2() {
