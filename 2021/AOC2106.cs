@@ -113,7 +113,78 @@ namespace CodeTAF
         }
 
         void part2() {
+            int[] startFishTimers = parseInput();
+            //List<fish> allFish = new();
+            int numDays = 256; //number of days to goto
 
+            //new
+            Int64 totalFish = startFishTimers.Length;
+            Int64[] newFishDay = new Int64[7];
+            Int64[] increaseNewFish = new Int64[7];
+            int dayID;
+
+            //new
+            for ( int i = 0; i < 7; i++ )
+            {
+                newFishDay[i] = 0;
+                increaseNewFish[i] = 0;
+            }
+
+            foreach (int thisDay in startFishTimers) {
+                newFishDay[thisDay]++;
+            }        
+
+
+            //old
+            //for (int i = 0; i < startFishTimers.Length; i++) {
+            //    //print(startFishTimers[i]);
+            //    allFish.Add(new fish(startFishTimers[i]));
+            //}
+            //old and new
+            for (int i = 0; i < numDays; i++) {
+                //old
+                //List<fish> newFish = new();
+                //foreach (fish curFish in allFish) {
+                //    if (curFish.nextDay()) { newFish.Add(curFish.LastChild); }
+                //}
+                //if (newFish.Count > 0) { allFish.AddRange(newFish); }
+
+                //new
+                dayID = i % 7;
+
+                //add last weeks fish to the upcoming new fish
+                newFishDay[(i + 2) % 7] += increaseNewFish[dayID];
+
+                //born new fish due today
+                totalFish += newFishDay[dayID];
+                //log the increase of new fish for next week. 
+                increaseNewFish[dayID] = newFishDay[dayID];
+                //if (i % 7 == 0) { print("==== New Week ======"); }
+                //print($"New Fish for the Day = {newFishDay[dayID]}");
+
+                //old
+                //if (i % 7 == 0) { print("==== New Week ======"); }
+                //print($"New Fish for the Day = {newFish.Count} (OLD)");
+            }
+
+            print($"Total number of fish after {numDays} days = {totalFish}");
+            //print($"Total number of fish after {numDays} days = {allFish.Count} (OLD)");
+
+            
+
+            //for (int i = 0; i < numDays ; i++) {
+            //    dayID = i % 7;
+
+            //    //add last weeks fish to the upcoming new fish
+            //    newFishDay[(i + 2) % 7] += increaseNewFish[dayID];
+
+            //    //born new fish due today
+            //    totalFish += newFishDay[dayID];
+            //    //log the increase of new fish for next week. 
+            //    increaseNewFish[dayID] = newFishDay[dayID];
+            //    if (i % 7 == 0) { print("==== New Week ======"); }
+            //    print($"New Fish for the Day = {newFishDay[dayID]}");
+            //}
 
         }
 
