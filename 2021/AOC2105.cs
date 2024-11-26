@@ -64,15 +64,15 @@ namespace CodeTAF
             public static int maxX;
             public static int maxY;
 
-            int X1 { get; set; }
-            int Y1 { get; set; }
-            int X2 { get; set; }
-            int Y2 { get; set; }
-            bool isHorizontalVertical { get; set; }
+            public int X1 { get; set; }
+            public int Y1 { get; set; }
+            public int X2 { get; set; }
+            public int Y2 { get; set; }
+            public bool IsHorizontalVertical { get; set; }
 
             public line(int x1, int y1, int x2, int y2) {
 
-                isHorizontalVertical = (x1 == x2 || y1 == y2) ? true : false;
+                IsHorizontalVertical = (x1 == x2 || y1 == y2) ? true : false;
 
                 X1 = x1;
                 Y1 = y1;
@@ -101,13 +101,38 @@ namespace CodeTAF
                 allLines.Add(new line(cordsNum[i], cordsNum[i + 1], cordsNum[i + 2], cordsNum[i + 3]));
             }
 
-            print(allLines.Count);
-
-            print($"Map size =  ({line.maxX} X {line.maxY})");
+            //print(allLines.Count);
+            //print($"Map size =  ({line.maxX+1} X {line.maxY+1})");
             
-            
-            //for (int i = 0; i < cords.Length; i++) { print(cords[i]); }
+            int[,] mainMap = new int[line.maxX+1, line.maxY+1];
 
+            mainMap = AocLib.SetAllValues(mainMap, 0);            
+
+            foreach (line curLine in allLines) {
+                if (curLine.IsHorizontalVertical) {
+                    if (curLine.X1 == curLine.X2) {                        
+                        for (int i = Math.Min(curLine.Y1, curLine.Y2);i <= Math.Max(curLine.Y1, curLine.Y2);i++) {                            
+                            mainMap[curLine.X1, i]++;
+                        }
+                    }
+                    else if (curLine.Y1 == curLine.Y2) {
+                        for (int i = Math.Min(curLine.X1, curLine.X2); i <= Math.Max(curLine.X1, curLine.X2); i++) {                            
+                            mainMap[i, curLine.Y1]++;
+                        }
+                    }
+                }
+            }
+
+            int totalOverlap = 0;
+            for (int col =  0; col < mainMap.GetLength(0); col++) {
+                for (int row = 0; row < mainMap.GetLength(1); row++) {
+                    if (mainMap[row,col] > 1) { totalOverlap++; }
+                }
+            }
+
+            AocLib.Print2d(mainMap, true);
+
+            print($"Total points that overlap {totalOverlap}"); 
 
         }
 
