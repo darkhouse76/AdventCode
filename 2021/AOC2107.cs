@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -16,7 +17,7 @@ namespace CodeTAF
         private bool run = false;
         private string input;
 
-        private readonly string inputFolderName = "inputs";
+        private const string inputFolderName = "inputs";
 
 
         string RootPath {
@@ -58,7 +59,80 @@ namespace CodeTAF
             }
         }
 
+
+
+
+        (int min, int max, int remainder) getRangeToSearch(int[] startPos, int targetAmtSections) {
+            int numOfPos = startPos.Max() + 1;
+            int[] amtPos = new int[numOfPos];
+
+            for (int i = 0; i < startPos.Length; i++) {
+                amtPos[startPos[i]]++;            
+            }
+
+            int remainder = numOfPos % targetAmtSections;
+
+            int sectionSize = numOfPos / targetAmtSections;
+            int minRange = 0;
+            int maxRange = 0;
+            int highCount = 0;
+            
+
+            for (int i = 0; i < amtPos.Length; i+= sectionSize) {
+
+                int curCount = 0;
+                for (int j = 0; (j < sectionSize && (i + j) < numOfPos); j++) {
+                    //print(i + j);
+                    curCount += amtPos[i + j];
+                }
+
+                if (curCount == highCount) { maxRange = i + (sectionSize - 1); }
+                else if (curCount > highCount) { highCount = curCount; minRange = i; maxRange = i + (sectionSize - 1); }
+                
+
+                //print("_____");
+            }
+
+
+            //print($"range = {minRange} - {maxRange} for a total of {highCount}");
+            //for (int i = 0; i < amtPos.Length; i++) { print($"Pos: {i} has {amtPos[i]} ships"); }
+
+            return (minRange, maxRange, remainder);
+
+        }
+
+        int getFuelCost(int[] startPos, int targetPos) {
+            int fuelCost = 0;
+            foreach (int ship in startPos) {
+                fuelCost += Math.Abs(targetPos - ship);
+            }
+            return fuelCost;
+        }
+
+
         void part1() {
+
+            int[] startPos = AocLib.parseInputToInt(input, ",");
+
+            var range = getRangeToSearch(startPos, 4);
+            //print(startPos.Max());
+            int numOfPos = startPos.Max() + 1;
+
+
+            int lowestFuelCost = int.MaxValue;
+            int bestPos = 999999;
+            for (int i = range.min; i < range.max; i++) {
+                int curFuelCost = getFuelCost(startPos, i);
+                if (lowestFuelCost > curFuelCost) { lowestFuelCost = curFuelCost; bestPos = i; }                
+            }
+
+            for (int i = (numOfPos - range.remainder) ; i < (numOfPos); i++) {
+                //print(i);
+                int curFuelCost = getFuelCost(startPos, i);
+                if (lowestFuelCost > curFuelCost) { lowestFuelCost = curFuelCost; bestPos = i; }
+            }
+
+            print($" The lowest Cost was {lowestFuelCost} for position {bestPos}");
 
 
         }
