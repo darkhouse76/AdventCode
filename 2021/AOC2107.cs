@@ -101,14 +101,20 @@ namespace CodeTAF
 
         }
 
-        int getFuelCost(int[] startPos, int targetPos) {
+        int getFuelCost(int[] startPos, int targetPos, bool isPart2 = false) {
             int fuelCost = 0;
             foreach (int ship in startPos) {
-                fuelCost += Math.Abs(targetPos - ship);
+                int amtMoves = Math.Abs(targetPos - ship);
+                if (isPart2) {
+                    fuelCost += amtMoves * (amtMoves + 1) / 2;
+                } 
+                else {
+                    fuelCost += amtMoves;
+                }
+                
             }
             return fuelCost;
-        }
-
+        }        
 
         void part1() {
 
@@ -138,7 +144,28 @@ namespace CodeTAF
         }
 
         void part2() {
+            int[] startPos = AocLib.parseInputToInt(input, ",");
 
+            //var range = getRangeToSearch(startPos, 4);
+            //print(startPos.Max());
+            int numOfPos = startPos.Max() + 1;
+
+
+            int lowestFuelCost = int.MaxValue;
+            int bestPos = 999999;
+
+            //for (int i = range.min; i < range.max; i++) {
+            //    int curFuelCost = getFuelCost(startPos, i, true);
+            //    if (lowestFuelCost > curFuelCost) { lowestFuelCost = curFuelCost; bestPos = i; }
+            //}
+
+            for (int i = 0; i < (numOfPos); i++) {
+                //print(i);
+                int curFuelCost = getFuelCost(startPos, i, true);
+                if (lowestFuelCost > curFuelCost) { lowestFuelCost = curFuelCost; bestPos = i; }
+            }
+
+            print($" The lowest Cost was {lowestFuelCost} for position {bestPos}");
 
         }
 
