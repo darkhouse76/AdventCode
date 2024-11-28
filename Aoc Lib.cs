@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Windows;
 
 namespace CodeTAF
 {
@@ -82,7 +83,20 @@ namespace CodeTAF
             return numbers.ToArray();
         }
 
+        //parses everything into numbers and then converts to int array. 
+        //overloads include string array or 1 string or 2 strings.
+        public static int[] parseInputToInt(string input, string[] separators) {
+            string[] startFishTimers = input.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+            return Array.ConvertAll(startFishTimers, int.Parse);
+        }
 
+        public static int[] parseInputToInt(string input, string arg1) {
+            return parseInputToInt(input, new string[] { arg1 });
+        }
+
+        public static int[] parseInputToInt(string input, string arg1, string arg2) {
+            return parseInputToInt(input, new string[] { arg1, arg2 });            
+        }
 
     }
 }
