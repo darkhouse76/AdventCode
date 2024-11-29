@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -59,9 +60,23 @@ namespace CodeTAF
         }
 
         void part1() {
+            
+            int[] targetSizes = new int[] { 2, 3, 4, 7 };
+            int targetsFound = 0;
 
+            string[] displayInfos = input.Split(new string[] { "\r\n", " | " }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 1; i < displayInfos.Length; i += 2) {
+                
+                string[] patterns = displayInfos[i].Split(" ");
+                foreach (string pattern in patterns) {
+                    //print(pattern.Count());
 
+                    if (targetSizes.Contains(pattern.Count())) { targetsFound++; }
+                }
+                //print(patterns.Count());
+            }
 
+            print($"1, 4, 7, and 8 appears {targetsFound}x times in output Patterns ");
         }
 
         void part2() {

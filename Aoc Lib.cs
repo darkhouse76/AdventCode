@@ -86,8 +86,8 @@ namespace CodeTAF
         //parses everything into numbers and then converts to int array. 
         //overloads include string array or 1 string or 2 strings.
         public static int[] parseInputToInt(string input, string[] separators) {
-            string[] startFishTimers = input.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-            return Array.ConvertAll(startFishTimers, int.Parse);
+            string[] stringArray = input.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+            return Array.ConvertAll(stringArray, int.Parse);
         }
 
         public static int[] parseInputToInt(string input, string arg1) {
