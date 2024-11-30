@@ -18,7 +18,7 @@ namespace CodeTAF
         //takes string of even grid of char and put them into a 2d array of char.
         //can be reversed vertically if needed to shift the 0,0 point to the bottom left instead of the the top left.        
         public static char[,] ParseSimpleCharMap(string input, bool reverseMap = false) {
-            string[] mapLines = input.Split("\r\n");
+            string[] mapLines = input.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
             if (reverseMap) { Array.Reverse(mapLines); }            
             char[,] output = new char[mapLines[0].Length, mapLines.Length];
 
@@ -35,9 +35,9 @@ namespace CodeTAF
             //bool reverseMap = true;
 
             if (reverseMap) {
-                for (int row = array2D.GetLength(0) - 1; row >= 0; row--) {
+                for (int row = array2D.GetLength(1) - 1; row >= 0; row--) {
                     string textRow = "";
-                    for (int col = 0; col < array2D.GetLength(1); col++) {
+                    for (int col = 0; col < array2D.GetLength(0); col++) {
                         if (withTab) { textRow += "\t"; }
                         textRow += array2D[col, row];
                     }
@@ -46,9 +46,9 @@ namespace CodeTAF
                 return;
             }
 
-            for (int row = 0; row < array2D.GetLength(0); row++) {
+            for (int row = 0; row < array2D.GetLength(1); row++) {
                 string textRow = "";
-                for (int col = 0; col < array2D.GetLength(1); col++) {
+                for (int col = 0; col < array2D.GetLength(0); col++) {
                     if (withTab) { textRow += "\t"; }
                     textRow += array2D[col, row];
                 }
