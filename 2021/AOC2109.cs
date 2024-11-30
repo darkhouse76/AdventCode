@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using static UnityEngine.Rendering.DebugUI.Table;
@@ -103,12 +104,13 @@ namespace CodeTAF
 
 
         }
-
+        //I know should be at the top....
         int[,] heightmap;
         (int x, int y) maxSize;
         bool[,] Checked;
         (int x, int y)[] directions = new[] { (0, 1), (1, 0), (0, -1), (-1, 0) };
 
+        //Look at this nice recursive method
         int checkPos((int x,int y) targetPos, (int x, int y) prevDir) {
             int basinCount = 0;
             for (int curDir = 0; curDir < directions.Length; curDir++) {
@@ -127,7 +129,7 @@ namespace CodeTAF
             return basinCount;
         }
 
-        void part2() { 
+        void part2() {  
 
             char[,] heightmapChar = AocLib.ParseSimpleCharMap(input);
             maxSize = (heightmapChar.GetLength(0), heightmapChar.GetLength(1));
@@ -166,18 +168,25 @@ namespace CodeTAF
 
                     //if not ruled out as low point and all checked dir were equal to the selected height then it's a low point. 
                     if (isLowPoint && equalCount != checkedDir) {
-                        print($"at ({col},{row}) is low point: {selectedHeight}");
+                        //print($"at ({col},{row}) is low point: {selectedHeight}");
                         lowPoints.Add((col, row));
                     }
 
                 }
             }
+            int[] largestBasins = new int[] { 0, 0, 0, 0 };
 
             //get number of basin points 
             foreach (var point in  lowPoints) {
-                print(checkPos(point, (0, 0)) + 1);
+                Checked[point.x, point.y] = true;
+                largestBasins[0] = checkPos(point, (0, 0)) + 1;
+                print($"Low point ({point.x},{point.y}) basin size: {largestBasins[0]}");
+                //keeps smallest at index 0
+                Array.Sort(largestBasins);
             }
-            
+
+            Array.Reverse(largestBasins);
+            print($"3 largest Basins were size: {largestBasins[0]}, {largestBasins[1]}, {largestBasins[2]} for the answer of {largestBasins[0] * largestBasins[1] * largestBasins[2]}");
 
         }
 
