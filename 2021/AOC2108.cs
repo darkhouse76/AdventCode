@@ -265,14 +265,7 @@ namespace CodeTAF
             }
 
             print($"Grand total of all display outputs = {allOutputTotals}");
-
-
-            
-
-
-
-
-
+        
         }
 
         void Update() {
