@@ -59,6 +59,25 @@ namespace CodeTAF
         }
 
         void part1() {
+            string[] lines = input.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+            int[] leftList = new int[lines.Length];
+            int[] rightList = new int[lines.Length];
+
+            for (int i = 0; i < lines.Length; i++) {
+                string[] sides = lines[i].Split("   ");
+                leftList[i] = int.Parse(sides[0]);
+                rightList[i] = int.Parse(sides[1]);
+            }
+            
+            Array.Sort(leftList);
+            Array.Sort(rightList);
+            int distanceDiff = 0;
+
+            for (int i = 0;i < leftList.Length;i++) {
+                distanceDiff += Math.Abs(leftList[i] - rightList[i]);
+            }
+
+            print($"total of all distances: {distanceDiff}");
 
 
         }
