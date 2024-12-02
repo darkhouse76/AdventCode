@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -58,7 +61,38 @@ namespace CodeTAF
             }
         }
 
+        bool isSafeReport(int[] levels) {
+            bool isIncreasing = (levels[0] < levels[1]);
+            for (int i = 1; i < levels.Length; i++) {
+                int prevLevel = levels[i - 1];
+                int curLevel = levels[i];
+
+                if (prevLevel == curLevel
+                    || (prevLevel < curLevel) != isIncreasing
+                    || Math.Abs(prevLevel - curLevel) > 3) { return false; }
+            }
+            return true;
+        }          
+
         void part1() {
+            string[] lines = input.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+            List<int[]> reports = new();
+
+            for (int i = 0; i < lines.Length; i++) {
+                reports.Add(AocLib.parseInputToInt(lines[i], " "));
+            }            
+
+            int numSafeReports = reports.ToArray().Count(report => isSafeReport(report));
+
+            ///orginal way I came up with. Then I condense to use the Count method for arrays///
+            /*
+            int numSafeReports = 0;
+            foreach (int[] report in reports) {
+                if (isSafeReport(report)) { numSafeReports++; }
+            }
+            */
+
+            print($"Number of safe reports: {numSafeReports}");
 
 
         }
