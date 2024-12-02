@@ -72,7 +72,7 @@ namespace CodeTAF
                     || Math.Abs(prevLevel - curLevel) > 3) { return false; }
             }
             return true;
-        }          
+        }           
 
         void part1() {
             string[] lines = input.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
@@ -99,7 +99,31 @@ namespace CodeTAF
 
         void part2() {
 
+            string[] lines = input.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+            List<int[]> reports = new();
 
+            for (int i = 0; i < lines.Length; i++) {
+                reports.Add(AocLib.parseInputToInt(lines[i], " "));
+            }
+
+            //int numSafeReports = reports.ToArray().Count(report => (isSafeReport2(report,true) || isSafeReport2(report,false)));
+
+            int numSafeReports = 0;
+            foreach (int[] report in reports) {
+
+                if (isSafeReport(report)) { numSafeReports++; continue; }
+
+                for (int j = 0; j < report.Length; j++) {
+
+                    var modLevels = report.ToList();
+                    modLevels.RemoveAt(j);
+
+                    if (isSafeReport(modLevels.ToArray())) { numSafeReports++; break; }
+                }            
+            }
+
+            print($"Number of safe reports: {numSafeReports}");
+            
         }
 
         void Update() {
