@@ -623,6 +623,7 @@ GameObject:
   - component: {fileID: 820830659}
   - component: {fileID: 820830660}
   - component: {fileID: 820830661}
+  - component: {fileID: 820830662}
   m_Layer: 0
   m_Name: Aoc Code
   m_TagString: Untagged
@@ -670,6 +671,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80a74ad1e73b2b549acc37b1584b9f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  partTwo: 0
+  useTestInput: 1
+  run: 0
+--- !u!114 &820830662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 820830657}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e7ba8975b6ca5544932dcb101240205, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   partTwo: 0
