@@ -37,7 +37,8 @@ namespace CodeTAF
         }
         string TestInput {
             get {
-                string filePath = $"{InputPath}{Day}test.txt";
+                string filePath = $"{InputPath}{Day}test";
+                filePath = (File.Exists(filePath+"2.txt")) ? $"{filePath}2.txt" : $"{filePath}.txt";
 
                 if (!File.Exists(filePath)) {
                     Debug.LogError($"NO input file found @ {filePath}");
