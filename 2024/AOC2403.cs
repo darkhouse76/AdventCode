@@ -39,7 +39,7 @@ namespace CodeTAF
         }
         string TestInput {
             get {
-                string filePath = $"{InputPath}{Day}test.txt";
+                string filePath = (partTwo) ? $"{InputPath}{Day}test2.txt" : $"{InputPath}{Day}test.txt";
 
                 if (!File.Exists(filePath)) {
                     Debug.LogError($"NO input file found @ {filePath}");
@@ -83,8 +83,36 @@ namespace CodeTAF
             print($"Total of all the multiplications: {totalResult}");
         }
 
-        void part2() {
+        void part2() { 
 
+            var validNumbersStr = Regex.Matches(input, @"((?<=mul\()\d+(?=,\d+\)))|((?<=mul\(\d+,)\d+(?=\)))|(do\(\))|(don't\(\))");
+
+            bool shouldMul = true;
+            List<int> validNumbers = new List<int>();
+
+            foreach (Match match in validNumbersStr) {
+                //print(match.Value);
+                switch (match.Value) {
+                    case "do()":
+                        shouldMul = true;
+                        continue;
+                    case "don't()":
+                        shouldMul = false;
+                        continue;
+                    default:
+                        if (shouldMul) { validNumbers.Add(int.Parse(match.Value)); }                        
+                        break;
+                }  
+            }
+
+            //print(validNumbers.Count);
+
+            int totalResult = 0;
+            for (int i = 0; i < validNumbers.Count; i += 2) {
+                //print($"({validNumbers[i]}*{validNumbers[i+1]})");
+                totalResult += validNumbers[i] * validNumbers[i + 1];
+            }
+            print($"Total of all the multiplications: {totalResult}");
 
         }
 
