@@ -89,9 +89,10 @@ namespace CodeTAF
             //string forwardSlash = wordSearch[startPos.x, startPos.y].ToString();
             //string backSlash = forwardSlash;
 
-            (int x, int y)[] crossDirections = new[] { (1, 1), (1, -1), (-1, -1), (-1, 1) };            
+            (int x, int y)[] crossDirections = new[] { (1, 1), (-1, -1), (1, -1), (-1, 1) };            
 
-            if (crossLetters[0] != 'A') { return false; }
+            //checks if middle letter is A and if the top left and bottom right are different.
+            if (crossLetters[0] != 'A' || wordSearch[startPos.x + 1,startPos.y + 1] == wordSearch[startPos.x - 1 , startPos.y - 1]) { return false; }
 
             foreach (var dir in  crossDirections) {
                 (int x, int y) checkPos = ((startPos.x + dir.x), (startPos.y + dir.y));
@@ -103,7 +104,7 @@ namespace CodeTAF
                 crossLetters.Add(wordSearch[checkPos.x,checkPos.y]);                
             }
 
-            if (crossLetters.Count(letter => letter == 'M') != 2 || crossLetters.Count(letter => letter == 'S') != 2) { return false; }
+            if (crossLetters.Count(letter => letter == 'M') != 2 || crossLetters.Count(letter => letter == 'S') != 2) { return false; }            
             return true;            
         }
 
