@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -81,6 +82,31 @@ namespace CodeTAF
             return false;
         }
 
+        bool checkforX((int x, int y) startPos) {
+
+            List<char> crossLetters = new() { wordSearch[startPos.x, startPos.y] };
+
+            //string forwardSlash = wordSearch[startPos.x, startPos.y].ToString();
+            //string backSlash = forwardSlash;
+
+            (int x, int y)[] crossDirections = new[] { (1, 1), (1, -1), (-1, -1), (-1, 1) };            
+
+            if (crossLetters[0] != 'A') { return false; }
+
+            foreach (var dir in  crossDirections) {
+                (int x, int y) checkPos = ((startPos.x + dir.x), (startPos.y + dir.y));
+                //check if part of the cross would be out of bounds  NOTE: might not be needed if I do the for loop not on the edges
+                //if (checkPos.x >= maxSize.x || checkPos.x < 0 || checkPos.y >= maxSize.y || checkPos.y < 0) {
+                //    return false;
+                //}
+
+                crossLetters.Add(wordSearch[checkPos.x,checkPos.y]);                
+            }
+
+            if (crossLetters.Count(letter => letter == 'M') != 2 || crossLetters.Count(letter => letter == 'S') != 2) { return false; }
+            return true;            
+        }
+
 
         void part1() {
             wordSearch = AocLib.ParseSimpleCharMap(input);
@@ -102,8 +128,17 @@ namespace CodeTAF
         }
 
         void part2() {
+            wordSearch = AocLib.ParseSimpleCharMap(input);
+            maxSize = (wordSearch.GetLength(0), wordSearch.GetLength(1));
 
+            int totalFound = 0;
 
+            for (int col = 1; col < maxSize.x-1; col++) {
+                for (int row = 1; row < maxSize.y-1; row++) {
+                    if (checkforX((col,row))) { totalFound++; }
+                }
+            }
+            print($"Total XMAS found: {totalFound}");
         }
 
         void Update() {
