@@ -59,16 +59,6 @@ namespace CodeTAF
             }
         }
 
-        void part1() {            
-
-
-        }
-
-        void part2() {
-            
-
-        }
-
         void Update() {
             if (run) {
                 run = false;
@@ -83,6 +73,23 @@ namespace CodeTAF
                 print($"Took {System.DateTime.Now - startTime} to complete.");
             }
         }
+
+        /////////////////////////////////////////////////////////////////
+        /// Everything above is for unity and getting the input files ///
+        /////////////////////////////////////////////////////////////////
+
+        void part1() {            
+
+
+        }
+
+        void part2() {
+            
+
+        }
+
+
+
     }
 }
 
