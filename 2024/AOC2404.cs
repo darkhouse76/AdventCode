@@ -61,6 +61,25 @@ namespace CodeTAF
             }
         }
 
+        void Update() {
+            if (run) {
+                run = false;
+                Debug.Log("========================================================================");
+
+                input = useTestInput ? TestInput : RealInput;
+
+                var startTime = System.DateTime.Now;
+
+                if (partTwo) { part2(); }
+                else { part1(); }
+                print($"Took {System.DateTime.Now - startTime} to complete.");
+            }
+        }
+
+        /////////////////////////////////////////////////////////////////
+        /// Everything above is for unity and getting the input files ///
+        /////////////////////////////////////////////////////////////////
+
         (int x, int y)[] directions = new[] { (0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1,-1), (-1,-1), (-1,1) };
         char[,] wordSearch;
         (int x, int y) maxSize;
@@ -142,20 +161,6 @@ namespace CodeTAF
             print($"Total XMAS found: {totalFound}");
         }
 
-        void Update() {
-            if (run) {
-                run = false;
-                Debug.Log("========================================================================");
-
-                input = useTestInput ? TestInput : RealInput;
-
-                var startTime = System.DateTime.Now;
-
-                if (partTwo) { part2(); }
-                else { part1(); }
-                print($"Took {System.DateTime.Now - startTime} to complete.");
-            }
-        }
     }
 }
 
