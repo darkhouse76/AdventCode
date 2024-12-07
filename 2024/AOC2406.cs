@@ -83,7 +83,7 @@ namespace CodeTAF{
         bool[,] walkedOn;
         (int x, int y) curPos;
         (int x, int y) curDir;
-        int totalWalkAmt = 0;
+        int totalWalkAmt;
 
         
         //if I didn't know the start dir...but i do
@@ -112,7 +112,7 @@ namespace CodeTAF{
                 curDir = AocLib.Map.TurnRight(curDir); 
                 walk(); 
             } else {
-                curPos = targetPos;
+                curPos = (targetPos.x,targetPos.y);
                 if (!walkedOn[curPos.x,curPos.y]) { walkedOn[curPos.x,curPos.y] = true; totalWalkAmt++; }
             }
             return true;            
@@ -125,7 +125,9 @@ namespace CodeTAF{
             walkedOn = AocLib.SetAllValues(new bool[maxSize.x, maxSize.y], false);
             curPos = AocLib.Map.Find(labMap,'^');
             curDir = AocLib.Map.Directions[AocLib.Map.UP];
-            
+            totalWalkAmt = 0;
+
+
             while (walk()) { continue; }
 
             print($"Guard walked total of {totalWalkAmt} distinct positions");
