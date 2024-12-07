@@ -92,8 +92,9 @@ namespace CodeTAF{
         
         //key is pos and value is the dir
         Dictionary<(int x, int y), (int x, int y)> path;
+        Dictionary<(int x, int y), (int x, int y)> loopTurns;
 
-        
+
         //if I didn't know the start dir...but i do
         (int x, int y) getStartPos(out (int x, int y) curDir) {
             var startIndicators = new char[] { '^', '<', 'v', '>' };
@@ -144,11 +145,15 @@ namespace CodeTAF{
                 }
 
                 var fakeObjPos = AocLib.Map.MoveForward(curPos, curDir);                
-                if (AocLib.Map.IsInBounds(fakeObjPos,maxSize)) {
+                if (AocLib.Map.IsInBounds(fakeObjPos,maxSize) && fakeObjPos != startPos) {
                     labTestMap = (char[,])labMap.Clone();
                     //add the fake obj to the "test" labMap
                     labTestMap[fakeObjPos.x, fakeObjPos.y] = '#';
-                    if (checkForLoop(curPos, curDir, new List<(int x, int y)>() { curPos }) ) {
+                    var loopPos = new List<(int x, int y)>();
+                    loopTurns = new();
+                    loopTurns.Add(curPos, curDir);
+                    loopPos.Add(curPos);
+                    if (checkForLoop(curPos, curDir) ) {
                         if (!validObjLoop.Contains(fakeObjPos)) {
                             totalLoops++;
                             validObjLoop.Add(fakeObjPos);
@@ -159,8 +164,7 @@ namespace CodeTAF{
             return true;
         }
 
-        bool checkForLoop((int x, int y) testFrom, (int x, int y) testDir, List<(int x, int y)> loopPos) {
-            if (AocLib.Map.MoveForward(testFrom, testDir) == startPos) { return false; }
+        bool checkForLoop((int x, int y) testFrom, (int x, int y) testDir) {            
             testDir = AocLib.Map.TurnRight(testDir);
 
             (int x, int y) pathDir;
@@ -170,12 +174,12 @@ namespace CodeTAF{
             var nextPos = AocLib.Map.MoveForward(testPos, testDir);
             //go until we find prev path going the same way or we hit a obj
             while (AocLib.Map.IsInBounds(nextPos, maxSize) && labTestMap[nextPos.x, nextPos.y] != '#') {
-                if ((path.TryGetValue(nextPos, out pathDir) && testDir == pathDir) || loopPos.Contains(nextPos)) { return true; }
+                if ((path.TryGetValue(nextPos, out pathDir) && testDir == pathDir) || (loopTurns.TryGetValue(nextPos, out pathDir) && testDir == pathDir)) { return true; }
                 testPos = nextPos;
                 nextPos = AocLib.Map.MoveForward(testPos, testDir);
             }
-            loopPos.Add(testPos);
-            return AocLib.Map.IsInBounds(nextPos, maxSize) && checkForLoop(testPos, testDir, loopPos); 
+            loopTurns.TryAdd(testPos, testDir);            
+            return AocLib.Map.IsInBounds(nextPos, maxSize) && checkForLoop(testPos, testDir); 
         }
 
         bool checkForLoop(List<(int x, int y)> allObjs) {
@@ -218,7 +222,7 @@ namespace CodeTAF{
             totalLoops = 0;
             validObjLoop = new();
 
-            path = new();
+            path = new();            
 
             List<(int x, int y)> allObjs = AocLib.Map.FindAll(labMap, '#');
 
