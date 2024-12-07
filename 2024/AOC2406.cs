@@ -88,6 +88,7 @@ namespace CodeTAF{
         (int x, int y) curDir;
         int totalWalkAmt;
         int totalLoops;
+        List<(int x, int y)> validObjLoop;
         
         //key is pos and value is the dir
         Dictionary<(int x, int y), (int x, int y)> path;
@@ -148,7 +149,10 @@ namespace CodeTAF{
                     //add the fake obj to the "test" labMap
                     labTestMap[fakeObjPos.x, fakeObjPos.y] = '#';
                     if (checkForLoop(curPos, curDir, new List<(int x, int y)>() { curPos }) ) {
-                        totalLoops++;
+                        if (!validObjLoop.Contains(fakeObjPos)) {
+                            totalLoops++;
+                            validObjLoop.Add(fakeObjPos);
+                        }
                     }
                 }
             }
@@ -212,6 +216,7 @@ namespace CodeTAF{
             curDir = AocLib.Map.Directions[AocLib.Map.UP];
             startPos = (curPos.x, curPos.y);
             totalLoops = 0;
+            validObjLoop = new();
 
             path = new();
 
