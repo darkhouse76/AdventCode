@@ -91,7 +91,7 @@ namespace CodeTAF{
         List<(int x, int y)> validObjLoop;
         
         //key is pos and value is the dir
-        Dictionary<(int x, int y), (int x, int y)> path;
+        //Dictionary<(int x, int y), (int x, int y)> path;
         Dictionary<(int x, int y), List<(int x, int y)>> path2;
         Dictionary<(int x, int y), (int x, int y)> loopTurns;
 
@@ -137,6 +137,7 @@ namespace CodeTAF{
 
             if (labMap[targetPos.x, targetPos.y] == '#') {
                 curDir = AocLib.Map.TurnRight(curDir);
+                if (!path2[curPos].Contains(curDir)) { path2[curPos].Add(curDir); }
                 walk3();
             }
             else {
@@ -147,45 +148,7 @@ namespace CodeTAF{
                 if (!path2[curPos].Contains(curDir)) { path2[curPos].Add(curDir); }                
             }
             return true;
-        }
-
-        //probably not needed
-        bool walk2() {
-            var targetPos = AocLib.Map.MoveForward(curPos, curDir);
-            if (!AocLib.Map.IsInBounds(targetPos, maxSize)) {
-                return false;
-            }
-
-            if (labMap[targetPos.x, targetPos.y] == '#') {
-                curDir = AocLib.Map.TurnRight(curDir);
-                walk2();
-            }
-            else {
-                curPos = (targetPos.x, targetPos.y);
-                if (!walkedOn[curPos.x, curPos.y]) {
-                    walkedOn[curPos.x, curPos.y] = true;
-                    path.Add(curPos, curDir);
-                }
-
-                var fakeObjPos = AocLib.Map.MoveForward(curPos, curDir);                
-                if (AocLib.Map.IsInBounds(fakeObjPos,maxSize) && fakeObjPos != startPos && labMap[fakeObjPos.x,fakeObjPos.y] != '#') {
-                    labTestMap = (char[,])labMap.Clone();
-                    //add the fake obj to the "test" labMap
-                    labTestMap[fakeObjPos.x, fakeObjPos.y] = '#';
-                    var loopPos = new List<(int x, int y)>();
-                    loopTurns = new();
-                    loopTurns.Add(curPos, curDir);
-                    loopPos.Add(curPos);
-                    if (checkForLoop(curPos, curDir) ) {
-                        if (!validObjLoop.Contains(fakeObjPos)) {
-                            totalLoops++;
-                            validObjLoop.Add(fakeObjPos);
-                        }
-                    }
-                }
-            }
-            return true;
-        }
+        }        
 
         //trying to refactor
         bool checkForLoopFromStart((int x, int y) testFrom, (int x, int y) testDir) {           
@@ -207,42 +170,7 @@ namespace CodeTAF{
             
             return AocLib.Map.IsInBounds(nextPos, maxSize) && checkForLoopFromStart(testPos, AocLib.Map.TurnRight(testDir));
         }
-
-        //propably not needed
-        bool checkForLoop((int x, int y) testFrom, (int x, int y) testDir) {            
-            testDir = AocLib.Map.TurnRight(testDir);
-
-            (int x, int y) pathDir;
-            if (path.TryGetValue(testFrom, out pathDir) && testDir == pathDir) { return true; }
-
-            var testPos = testFrom;
-            var nextPos = AocLib.Map.MoveForward(testPos, testDir);
-            //go until we find prev path going the same way or we hit a obj
-            while (AocLib.Map.IsInBounds(nextPos, maxSize) && labTestMap[nextPos.x, nextPos.y] != '#') {
-                if ((path.TryGetValue(nextPos, out pathDir) && testDir == pathDir) || (loopTurns.TryGetValue(nextPos, out pathDir) && testDir == pathDir)) { return true; }
-                testPos = nextPos;
-                nextPos = AocLib.Map.MoveForward(testPos, testDir);
-            }
-            if (!loopTurns.TryAdd(testPos, testDir)) { 
-                //print($"Tried to add {testPos}:{testDir} but value was already = {loopTurns[testPos]}"); 
-            }            
-            return AocLib.Map.IsInBounds(nextPos, maxSize) && checkForLoop(testPos, testDir); 
-        }
-        //probably not needed
-        bool checkForLoop(List<(int x, int y)> allObjs) {
-            //might need to check if a obj is already in the "new" obj location
-            if (AocLib.Map.MoveForward(curPos, curDir) == startPos) { return false; }
-
-            return (AocLib.Map.TurnRight(curDir) == path[curPos]);
-            /*
-            var testDir = AocLib.Map.TurnRight(curDir);
-            if (testDir.x == 0 && testDir.y > 0) { return allObjs.Exists(objPos => (objPos.x == curPos.x && objPos.y > curPos.y)); }
-            if (testDir.x == 0 && testDir.y < 0) { return allObjs.Exists(objPos => (objPos.x == curPos.x && objPos.y < curPos.y)); }
-            if (testDir.y == 0 && testDir.x > 0) { return allObjs.Exists(objPos => (objPos.y == curPos.y && objPos.x > curPos.x)); }
-
-            return allObjs.Exists(objPos => (objPos.y == curPos.y && objPos.x < curPos.x)); }
-            */
-        }
+              
 
         void part1() {
             labMap = AocLib.ParseSimpleCharMap(input);
@@ -252,7 +180,7 @@ namespace CodeTAF{
             curDir = AocLib.Map.Directions[AocLib.Map.UP];
             totalWalkAmt = 0;
 
-            path = new();
+            path2 = new();
 
             while (walk3()) { continue; }
 
@@ -271,10 +199,9 @@ namespace CodeTAF{
             startPos = (curPos.x, curPos.y);
             totalLoops = 0;
             validObjLoop = new();
+            path2 = new();      
 
-            path2 = new();            
-
-            List<(int x, int y)> allObjs = AocLib.Map.FindAll(labMap, '#');
+            
 
 
             path2.Add(startPos, new());
