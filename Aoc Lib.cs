@@ -1,8 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Windows;
+
 
 namespace CodeTAF
 {
@@ -14,6 +13,84 @@ namespace CodeTAF
             print($"test print = {house}");
             //Debug.Log(house);
         }
+
+
+        public static class Map {
+
+            public readonly static (int x, int y)[] Directions = new[] { (0, 1), (1, 0), (0, -1), (-1, 0) };
+
+            public const int DOWN = 0;
+            public const int RIGHT = 1;
+            public const int UP = 2;
+            public const int LEFT = 3;
+
+            
+            public static (int x, int y) TurnAround((int x, int y) curDir) {
+                return TurnRight(TurnRight(curDir));
+            }
+
+            public static (int x, int y) TurnLeft((int x, int y) curDir) {
+                int newDir = -1;
+                for (int i = 0; i < Directions.Length; i++) {
+                    if (curDir == Directions[i]) { newDir = i + 1; }
+                }
+                return (newDir > 3) ? Directions[0] : Directions[newDir];
+            }
+
+            public static (int x, int y) TurnRight((int x, int y) curDir) {
+                int newDir = 99;
+                for (int i = 0; i < Directions.Length; i++) {
+                    if (curDir == Directions[i]) { newDir = i - 1; }
+                }
+                return (newDir < 0) ? Directions[3] : Directions[newDir];
+            }
+
+            public static (int x, int y) MoveForward((int x, int y) curPos, (int x, int y) curDir) {
+                return (curPos.x + curDir.x, curPos.y + curDir.y);                
+            }
+
+            public static (int x, int y) MoveBack((int x, int y) curPos, (int x, int y) curDir) {
+                return (curPos.x - curDir.x, curPos.y - curDir.y);
+            }
+
+            //finds the first instance of whatever target in the 2d array.
+            // Recommend to use the TryFind version if uncertain if actually in the array. 
+            public static (int x, int y) Find<T>(T[,] map, T target) {
+                for (int col = 0; col < map.GetLength(0); col++) {
+                    for (int row = 0; row < map.GetLength(1); row++) {
+                        if (map[col, row].Equals(target)) { return (col, row); }
+                    }
+                }
+                return (-1, -1);
+            }
+
+            //Tries to find the first instance of whatever target in the 2d array.
+            public static bool TryFind<T>(T[,] map, T target, out (int x, int y) targetPos) {
+                for (int col = 0;  col < map.GetLength(0); col++) {
+                    for (int row = 0; row < map.GetLength(1); row++) {
+                        if (map[col, row].Equals(target)) { 
+                            targetPos = (col, row);
+                            return true; }
+                    }
+                }
+                targetPos = default;
+                return false;
+            }
+            
+            //checks if the position is in the bounds. Either by tuple maxSize or the 2d array it's self
+            public static bool IsInBounds((int x, int y) checkPos, (int x, int y) sizeMax) {
+                return (checkPos.x >= 0 && checkPos.y >= 0 && checkPos.x < sizeMax.x && checkPos.y < sizeMax.y);              
+            }
+            //checks if the position is in the bounds. Either by tuple maxSize or the 2d array it's self
+            public static bool IsInBounds<T>((int x, int y) checkPos, T[,] map) {
+                (int x, int y) sizeMax = (map.GetLength(0), map.GetLength(1));
+                return (checkPos.x >= 0 && checkPos.y >= 0 && checkPos.x < sizeMax.x && checkPos.y < sizeMax.y);
+            }
+
+
+
+        }
+
         
         //takes string of even grid of char and put them into a 2d array of char.
         //can be reversed vertically if needed to shift the 0,0 point to the bottom left instead of the the top left.        
