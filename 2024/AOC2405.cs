@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -121,24 +122,59 @@ namespace CodeTAF
         }
 
         
-        bool checkIfValid(int[] curUpdate, out int middlePage) {
-            int upperBound = curUpdate.GetUpperBound(0);
-            middlePage = curUpdate[upperBound / 2];            
+        bool checkIfValid(int[] curUpdate, out int middlePage, bool fixUpdateOnly = false) {
+            return checkIfValid(curUpdate.ToList(), out middlePage, fixUpdateOnly);           
+        }
+
+        bool checkIfValid(List<int> curUpdate, out int middlePage, bool fixUpdateOnly = false) {
+            int upperBound = curUpdate.Count;
+            middlePage = curUpdate[upperBound / 2];
 
             //exits if any index in the update is invalid by not following on of the rules.
-            for (int curIndex = 0; curIndex < curUpdate.Length; curIndex++) {                
+            for (int curIndex = 0; curIndex < curUpdate.Count; curIndex++) {
                 foreach (int rule in rules[curUpdate[curIndex]]) {
                     //if negative then needs to not be earlier in the update array
-                    if (rule > 0 && curIndex != 0 ) {                        
-                        if ( curUpdate[..^(upperBound - curIndex)].ToList().Contains(rule) ) { return false; }
-                    } else if (curIndex != upperBound) {
-                    //if  then needs to not be later in the update array                        
-                        if ( curUpdate[curIndex..].ToList().Contains(rule * -1) ) { return false;}
-                    }                
-                }   
+                    if (rule > 0 && curIndex != 0) {
+                        if (curUpdate.GetRange(0, curIndex).Contains(rule)) {
+                            if (fixUpdateOnly) { middlePage = makeValid(curUpdate); }
+                            return fixUpdateOnly;
+                        }
+                    }
+                    else if (curIndex != upperBound) {
+                        //if  then needs to not be later in the update array                        
+                        if (curUpdate.GetRange(curIndex, upperBound - curIndex).Contains(rule * -1)) {
+                            if (fixUpdateOnly) { middlePage = makeValid(curUpdate); }                            
+                            return fixUpdateOnly;
+                        }
+                    }
+                }
             }
 
-            return true;
+            return !fixUpdateOnly;
+        }
+
+        int makeValid(List<int> curUpdate) {
+
+            List<int> validList = new List<int>() { curUpdate[0] };            
+            int middlePage = -1;
+            int curIndex = 1;
+            
+            //int[] testList = validList;
+
+            while (validList.Count < curUpdate.Count) {            
+                for (int i = 0; i < validList.Count; i++) {
+                    List<int> testList = validList;
+                    testList.Insert(testList.Count - 1 - i, curUpdate[curIndex]);
+
+                    if (checkIfValid(testList, out middlePage)) {
+                        validList = testList;
+                        break;
+                    }                    
+                }
+                curIndex++;                
+            }
+
+            return middlePage;
         }
 
         void part1() {
@@ -155,7 +191,16 @@ namespace CodeTAF
         }
 
         void part2() {
+            var sections = parseInput(input);
+            rules = new Dictionary<int, List<int>>();
+            createRuleDict(sections.rules);
 
+            int middleTotals = 0;
+            foreach (int[] update in sections.updates) {
+                if (checkIfValid(update, out int middleUpdate, true)) { middleTotals += middleUpdate; }
+            }
+
+            print($"Total of all middle pages fixed = {middleTotals}");      
 
         }
 
