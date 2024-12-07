@@ -88,6 +88,7 @@ namespace CodeTAF{
         (int x, int y) curDir;
         int totalWalkAmt;
         int totalLoops;
+        
         //key is pos and value is the dir
         Dictionary<(int x, int y), (int x, int y)> path;
 
@@ -146,7 +147,7 @@ namespace CodeTAF{
                     labTestMap = (char[,])labMap.Clone();
                     //add the fake obj to the "test" labMap
                     labTestMap[fakeObjPos.x, fakeObjPos.y] = '#';
-                    if (checkForLoop(curPos, curDir, curPos)) {
+                    if (checkForLoop(curPos, curDir, new List<(int x, int y)>() { curPos }) ) {
                         totalLoops++;
                     }
                 }
@@ -154,23 +155,23 @@ namespace CodeTAF{
             return true;
         }
 
-        bool checkForLoop((int x, int y) testFrom, (int x, int y) testDir, (int x, int y) startOfLoop) {
+        bool checkForLoop((int x, int y) testFrom, (int x, int y) testDir, List<(int x, int y)> loopPos) {
             if (AocLib.Map.MoveForward(testFrom, testDir) == startPos) { return false; }
             testDir = AocLib.Map.TurnRight(testDir);
 
             (int x, int y) pathDir;
-            if (path.TryGetValue(curPos, out pathDir) && testDir == pathDir) { return true; }
+            if (path.TryGetValue(testFrom, out pathDir) && testDir == pathDir) { return true; }
 
-            var testPos = curPos;
+            var testPos = testFrom;
             var nextPos = AocLib.Map.MoveForward(testPos, testDir);
             //go until we find prev path going the same way or we hit a obj
             while (AocLib.Map.IsInBounds(nextPos, maxSize) && labTestMap[nextPos.x, nextPos.y] != '#') {
-                if ((path.TryGetValue(nextPos, out pathDir) && testDir == pathDir) || nextPos == startOfLoop) { return true; }
+                if ((path.TryGetValue(nextPos, out pathDir) && testDir == pathDir) || loopPos.Contains(nextPos)) { return true; }
                 testPos = nextPos;
                 nextPos = AocLib.Map.MoveForward(testPos, testDir);
             }
-
-            return AocLib.Map.IsInBounds(nextPos, maxSize) && checkForLoop(testPos, testDir, startOfLoop); 
+            loopPos.Add(testPos);
+            return AocLib.Map.IsInBounds(nextPos, maxSize) && checkForLoop(testPos, testDir, loopPos); 
         }
 
         bool checkForLoop(List<(int x, int y)> allObjs) {
