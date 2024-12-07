@@ -76,7 +76,31 @@ namespace CodeTAF
                 targetPos = default;
                 return false;
             }
-            
+            //finds All instances of whatever target in the 2d array.
+            // Recommend to use the TryFindAll version if uncertain if actually in the array. 
+            public static List<(int x, int y)> FindAll<T>(T[,] map, T target) {
+                List<(int x, int y)> targetsPos = new();
+                for (int col = 0; col < map.GetLength(0); col++) {
+                    for (int row = 0; row < map.GetLength(1); row++) {
+                        if (map[col, row].Equals(target)) { targetsPos.Add((col, row)); }
+                    }
+                }
+                return targetsPos;
+            }
+            //Tries to find All instances of whatever target in the 2d array.
+            public static bool TryFindAll<T>(T[,] map, T target, out List<(int x, int y)> targetsPos) {
+                targetsPos = new();
+                for (int col = 0; col < map.GetLength(0); col++) {
+                    for (int row = 0; row < map.GetLength(1); row++) {
+                        if (map[col, row].Equals(target)) {
+                            targetsPos.Add((col, row));
+                            return true;
+                        }
+                    }
+                }                
+                return false;
+            }
+
             //checks if the position is in the bounds. Either by tuple maxSize or the 2d array it's self
             public static bool IsInBounds((int x, int y) checkPos, (int x, int y) sizeMax) {
                 return (checkPos.x >= 0 && checkPos.y >= 0 && checkPos.x < sizeMax.x && checkPos.y < sizeMax.y);              
