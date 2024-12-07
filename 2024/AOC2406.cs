@@ -139,16 +139,16 @@ namespace CodeTAF{
                     walkedOn[curPos.x, curPos.y] = true;
                     path.Add(curPos, curDir);
                 }
-                if (checkForLoop()) {
+                if (checkForLoop(curPos, curDir, curPos)) {
                     totalLoops++;
                 }
             }
             return true;
         }
 
-        bool checkForLoop() {
-            if (AocLib.Map.MoveForward(curPos, curDir) == startPos) { return false; }
-            var testDir = AocLib.Map.TurnRight(curDir);
+        bool checkForLoop((int x, int y) testFrom, (int x, int y) testDir, (int x, int y) startOfLoop) {
+            if (AocLib.Map.MoveForward(testFrom, testDir) == startPos) { return false; }
+            testDir = AocLib.Map.TurnRight(testDir);
 
             (int x, int y) pathDir;
             if (path.TryGetValue(curPos, out pathDir) && testDir == pathDir) { return true; }
@@ -157,14 +157,12 @@ namespace CodeTAF{
             var nextPos = AocLib.Map.MoveForward(testPos, testDir);
             //go until we find prev path going the same way or we hit a obj
             while (AocLib.Map.IsInBounds(nextPos, maxSize) && labMap[nextPos.x, nextPos.y] != '#') {
-                if (path.TryGetValue(nextPos, out pathDir) && testDir == pathDir) { return true; }
+                if ((path.TryGetValue(nextPos, out pathDir) && testDir == pathDir) || nextPos == startOfLoop) { return true; }
                 testPos = nextPos;
                 nextPos = AocLib.Map.MoveForward(testPos, testDir);
             }
 
-            if (path.TryGetValue(testPos, out pathDir) && AocLib.Map.TurnRight(testDir) == pathDir) { return true; }
-
-            return false;
+            return AocLib.Map.IsInBounds(nextPos, maxSize) && checkForLoop(testPos, testDir, startOfLoop); 
         }
 
         bool checkForLoop(List<(int x, int y)> allObjs) {
