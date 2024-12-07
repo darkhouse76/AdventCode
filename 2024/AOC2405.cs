@@ -155,23 +155,28 @@ namespace CodeTAF
 
         int makeValid(List<int> curUpdate) {
 
-            List<int> validList = new List<int>() { curUpdate[0] };            
+            List<int> validList = new List<int>() { curUpdate[0] };
+            List<int> testList = new List<int>(validList);
+            
             int middlePage = -1;
-            int curIndex = 1;
+            //int curIndex = 1;
             
             //int[] testList = validList;
-
-            while (validList.Count < curUpdate.Count) {            
+            for (int curIndex = 1;  curIndex < curUpdate.Count; curIndex++) {
+                testList.Add(curUpdate[curIndex]);
+                if (checkIfValid(testList, out middlePage)) {
+                    validList = new List<int>(testList);
+                    continue;
+                }
                 for (int i = 0; i < validList.Count; i++) {
-                    List<int> testList = validList;
-                    testList.Insert(testList.Count - 1 - i, curUpdate[curIndex]);
+                    testList = new List<int>(validList);
+                    testList.Insert(validList.Count - 1 - i, curUpdate[curIndex]);
 
                     if (checkIfValid(testList, out middlePage)) {
-                        validList = testList;
+                        validList = new List<int>(testList);
                         break;
                     }                    
-                }
-                curIndex++;                
+                }                     
             }
 
             return middlePage;
