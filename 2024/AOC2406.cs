@@ -80,6 +80,7 @@ namespace CodeTAF{
 
         
         char[,] labMap;
+        char[,] labTestMap;
         (int x, int y) maxSize;
         bool[,] walkedOn;
         (int x, int y) startPos;
@@ -139,8 +140,15 @@ namespace CodeTAF{
                     walkedOn[curPos.x, curPos.y] = true;
                     path.Add(curPos, curDir);
                 }
-                if (checkForLoop(curPos, curDir, curPos)) {
-                    totalLoops++;
+
+                var fakeObjPos = AocLib.Map.MoveForward(curPos, curDir);                
+                if (AocLib.Map.IsInBounds(fakeObjPos,maxSize)) {
+                    labTestMap = (char[,])labMap.Clone();
+                    //add the fake obj to the "test" labMap
+                    labTestMap[fakeObjPos.x, fakeObjPos.y] = '#';
+                    if (checkForLoop(curPos, curDir, curPos)) {
+                        totalLoops++;
+                    }
                 }
             }
             return true;
@@ -156,7 +164,7 @@ namespace CodeTAF{
             var testPos = curPos;
             var nextPos = AocLib.Map.MoveForward(testPos, testDir);
             //go until we find prev path going the same way or we hit a obj
-            while (AocLib.Map.IsInBounds(nextPos, maxSize) && labMap[nextPos.x, nextPos.y] != '#') {
+            while (AocLib.Map.IsInBounds(nextPos, maxSize) && labTestMap[nextPos.x, nextPos.y] != '#') {
                 if ((path.TryGetValue(nextPos, out pathDir) && testDir == pathDir) || nextPos == startOfLoop) { return true; }
                 testPos = nextPos;
                 nextPos = AocLib.Map.MoveForward(testPos, testDir);
