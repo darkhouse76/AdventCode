@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -81,9 +82,13 @@ namespace CodeTAF{
         char[,] labMap;
         (int x, int y) maxSize;
         bool[,] walkedOn;
+        (int x, int y) startPos;
         (int x, int y) curPos;
         (int x, int y) curDir;
         int totalWalkAmt;
+        int totalLoops;
+        //key is pos and value is the dir
+        Dictionary<(int x, int y), (int x, int y)> path;
 
         
         //if I didn't know the start dir...but i do
@@ -118,6 +123,64 @@ namespace CodeTAF{
             return true;            
         }
 
+        bool walk2() {
+            var targetPos = AocLib.Map.MoveForward(curPos, curDir);
+            if (!AocLib.Map.IsInBounds(targetPos, maxSize)) {
+                return false;
+            }
+
+            if (labMap[targetPos.x, targetPos.y] == '#') {
+                curDir = AocLib.Map.TurnRight(curDir);
+                walk2();
+            }
+            else {
+                curPos = (targetPos.x, targetPos.y);
+                if (!walkedOn[curPos.x, curPos.y]) {
+                    walkedOn[curPos.x, curPos.y] = true;
+                    path.Add(curPos, curDir);
+                }
+                if (checkForLoop()) {
+                    totalLoops++;
+                }
+            }
+            return true;
+        }
+
+        bool checkForLoop() {
+            if (AocLib.Map.MoveForward(curPos, curDir) == startPos) { return false; }
+            var testDir = AocLib.Map.TurnRight(curDir);
+
+            (int x, int y) pathDir;
+            if (path.TryGetValue(curPos, out pathDir) && testDir == pathDir) { return true; }
+
+            var testPos = curPos;
+            var nextPos = AocLib.Map.MoveForward(testPos, testDir);
+            //go until we find prev path going the same way or we hit a obj
+            while (AocLib.Map.IsInBounds(nextPos, maxSize) && labMap[nextPos.x, nextPos.y] != '#') {
+                if (path.TryGetValue(nextPos, out pathDir) && testDir == pathDir) { return true; }
+                testPos = nextPos;
+                nextPos = AocLib.Map.MoveForward(testPos, testDir);
+            }
+
+            if (path.TryGetValue(testPos, out pathDir) && AocLib.Map.TurnRight(testDir) == pathDir) { return true; }
+
+            return false;
+        }
+
+        bool checkForLoop(List<(int x, int y)> allObjs) {
+            //might need to check if a obj is already in the "new" obj location
+            if (AocLib.Map.MoveForward(curPos, curDir) == startPos) { return false; }
+
+            return (AocLib.Map.TurnRight(curDir) == path[curPos]);
+            /*
+            var testDir = AocLib.Map.TurnRight(curDir);
+            if (testDir.x == 0 && testDir.y > 0) { return allObjs.Exists(objPos => (objPos.x == curPos.x && objPos.y > curPos.y)); }
+            if (testDir.x == 0 && testDir.y < 0) { return allObjs.Exists(objPos => (objPos.x == curPos.x && objPos.y < curPos.y)); }
+            if (testDir.y == 0 && testDir.x > 0) { return allObjs.Exists(objPos => (objPos.y == curPos.y && objPos.x > curPos.x)); }
+
+            return allObjs.Exists(objPos => (objPos.y == curPos.y && objPos.x < curPos.x)); }
+            */
+        }
 
         void part1() {
             labMap = AocLib.ParseSimpleCharMap(input);
@@ -137,9 +200,23 @@ namespace CodeTAF{
         void part2() {
             labMap = AocLib.ParseSimpleCharMap(input);
             maxSize = (labMap.GetLength(0), labMap.GetLength(1));
+            walkedOn = AocLib.SetAllValues(new bool[maxSize.x, maxSize.y], false);
+            curPos = AocLib.Map.Find(labMap, '^');
+            curDir = AocLib.Map.Directions[AocLib.Map.UP];
+            startPos = (curPos.x, curPos.y);
+            totalLoops = 0;
+
+            path = new();
+
+            List<(int x, int y)> allObjs = AocLib.Map.FindAll(labMap, '#');
+
+            walkedOn[startPos.x, startPos.y] = true;
+            path.Add(startPos, curDir);
+
+            while (walk2()) { continue; };
+
+            print($"Total possible loops: {totalLoops}");
         }
-
-
 
     }
 }
