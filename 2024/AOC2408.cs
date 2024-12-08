@@ -126,8 +126,34 @@ namespace CodeTAF
         }
 
         void part2() {
+            char[,] antennaMap = AocLib.ParseSimpleCharMap(input);
+            maxSize = (antennaMap.GetLength(0), antennaMap.GetLength(1));
 
+            antennaPos = new();
+            List<(int x, int y)> antiNodes = new();
+            getAllAntennaLocations(antennaMap);
 
+            foreach (KeyValuePair<char, List<(int x, int y)>> antenna in antennaPos) {
+
+                for (int i = 0; i < antenna.Value.Count; i++) {
+                    //where at minus the other one
+                    var curMainAntenna = antenna.Value[i];
+
+                    for (int j = 0; j < antenna.Value.Count; j++) {
+
+                        if (j == i) { continue; }
+                        (int x, int y) antiNodeOffset = (curMainAntenna.x - antenna.Value[j].x, curMainAntenna.y - antenna.Value[j].y);
+                        (int x, int y) antiNodePos = curMainAntenna;
+                        if (!antiNodes.Contains(antiNodePos)) { antiNodes.Add(antiNodePos); }
+
+                        do { 
+                            antiNodePos = (antiNodePos.x + antiNodeOffset.x, (antiNodePos.y + antiNodeOffset.y));
+                            if (AocLib.Map.IsInBounds(antiNodePos, maxSize) && !antiNodes.Contains(antiNodePos)) { antiNodes.Add(antiNodePos); }
+                        } while (AocLib.Map.IsInBounds(antiNodePos, maxSize));
+                    }
+                }
+            }
+            print($"Number of antinodes found on map = {antiNodes.Count}");
         }
 
 
