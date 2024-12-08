@@ -78,8 +78,46 @@ namespace CodeTAF
         /// Everything above is for unity and getting the input files ///
         /////////////////////////////////////////////////////////////////
 
-        void part1() {
+        bool checkForValidOps(string curOps, (int depth, long answer, int[] equationNums) target ) {
 
+            if (curOps.Length == target.depth) {
+                int answer = (curOps[0] == '*')? (target.equationNums[0] * target.equationNums[1]) : (target.equationNums[0] + target.equationNums[1]);
+
+                //check for valid solution
+                for (int i = 1; i < curOps.Length; i++) {
+                    switch (curOps[i]) {
+                        case '*':
+                            answer *= target.equationNums[i + 1];
+                            break;
+                        case '+':
+                            answer += target.equationNums[i + 1];
+                            break;
+                    }
+                    //if the answer is ever higher than the target answer, it exits
+                    if (answer > target.answer) return false;
+                }
+                return (answer == target.answer);
+            }
+
+            return checkForValidOps(curOps + '*', target) || checkForValidOps(curOps + '+', target);
+        }
+
+
+        void part1() {
+            string[] equations = input.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+
+            long totalOfValidAnswers = 0;
+            foreach (string equation in equations) {
+                string[] parts = equation.Split(":", StringSplitOptions.RemoveEmptyEntries);
+                long answer = long.Parse(parts[0]);
+                int[] opSide = AocLib.parseInputToInt(parts[1], " ");
+                int numOps = opSide.Length - 1;
+
+                if (checkForValidOps("",(numOps,answer,opSide))) {
+                    totalOfValidAnswers += answer;
+                }
+            }
+            print($"Sum of all the valid answers = {totalOfValidAnswers}");
 
         }
 
