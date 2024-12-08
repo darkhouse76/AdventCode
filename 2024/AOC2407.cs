@@ -81,7 +81,7 @@ namespace CodeTAF
         bool checkForValidOps(string curOps, (int depth, long answer, int[] equationNums) target ) {
 
             if (curOps.Length == target.depth) {
-                int answer = (curOps[0] == '*')? (target.equationNums[0] * target.equationNums[1]) : (target.equationNums[0] + target.equationNums[1]);
+                long answer = (curOps[0] == '*')? (target.equationNums[0] * target.equationNums[1]) : (target.equationNums[0] + target.equationNums[1]);
 
                 //check for valid solution
                 for (int i = 1; i < curOps.Length; i++) {
