@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -79,7 +81,50 @@ namespace CodeTAF
         /////////////////////////////////////////////////////////////////
 
         void part1() {
+            List<int> fsIds = new();
+            //List<int> freeIndexes = new();
 
+            int numFree = 0; //might need for part 2. I have feeling
+            int numFiles = 0;
+            int numFileBlocks = 0;
+
+            for (int i = 0; i < input.Length; i++) {
+                for (int j = 0; j < (int)(input[i] - '0'); j++) {
+                    if (i % 2 == 0) {
+                        numFiles++;
+                        fsIds.Add(numFileBlocks);
+                    } else {
+                        numFree++;
+                        //freeIndexes.Add(fsIds.Count);
+                        fsIds.Add(-1);
+                    }
+                }
+                if (i % 2 == 0) numFileBlocks++;
+            }           
+            
+            
+            int[] beginningBlocks = fsIds.GetRange(0, numFiles).ToArray();
+            List<int> endingBlocks = fsIds.GetRange(numFiles, fsIds.Count - numFiles);
+            endingBlocks.RemoveAll(x => x < 0);
+            endingBlocks.Reverse();
+
+            int[] finalFS = new int[beginningBlocks.Length];
+            int moveFileCount = 0;
+
+            for (int i = 0; i < beginningBlocks.Length; i++) {
+                finalFS[i] = (beginningBlocks[i] >= 0) ? beginningBlocks[i] : endingBlocks[moveFileCount++];                
+            }
+            
+            long checkSum = 0;
+            //string fileSystem = "";
+            for (int i = 0; i < finalFS.Length; i++) {
+                checkSum += finalFS[i] * i;  
+                //fileSystem += finalFS[i];
+            }
+            //print(fileSystem);
+
+            print($"The checksum for the filesystem = {checkSum}");
+           
 
         }
 
