@@ -80,6 +80,25 @@ namespace CodeTAF
         /// Everything above is for unity and getting the input files ///
         /////////////////////////////////////////////////////////////////
 
+        int firstFreeIndexCache;        
+
+        bool isFreeSpaceToMove(List<int> fsIds, int size, int upperIndexLimit, out int moveStartIndex) {
+            int freeSize = 0;
+            moveStartIndex = -1;                      
+
+            for (int i = firstFreeIndexCache; i < upperIndexLimit; i++) {
+                if (fsIds[i] < 0) {
+                    if (freeSize == 0) { moveStartIndex = i; }
+                    if (++freeSize == size) { 
+                        if (moveStartIndex == firstFreeIndexCache) { firstFreeIndexCache += size; }
+                        return true; }
+                } else {
+                    freeSize = 0;
+                }
+            }
+            return false;
+        }
+
         void part1() {
             List<int> fsIds = new();
             //List<int> freeIndexes = new();
@@ -123,14 +142,59 @@ namespace CodeTAF
             }
             //print(fileSystem);
 
-            print($"The checksum for the filesystem = {checkSum}");
-           
+            print($"The checksum for the filesystem = {checkSum}");           
 
         }
 
         void part2() {
 
+            List<int> fsIds = new();
+            List<int> sizeOfBlocks = new(); 
 
+            int numFiles = 0;
+            int numFileBlocks = 0;
+
+            for (int i = 0; i < input.Length; i++) {
+                for (int j = 0; j < (int)(input[i] - '0'); j++) {
+                    if (i % 2 == 0) {
+                        numFiles++;
+                        fsIds.Add(numFileBlocks);
+                    }
+                    else {                        
+                        fsIds.Add(-1);
+                    }
+                }
+                if (i % 2 == 0) { 
+                    numFileBlocks++; 
+                    sizeOfBlocks.Add((int)(input[i] - '0')); 
+                }                
+            }
+            //init the cache
+            firstFreeIndexCache = fsIds.IndexOf(-1);
+
+            //go from the back
+            for (int checkIndex = (fsIds.Count - 1); checkIndex > 0; checkIndex--) {
+                if (fsIds[checkIndex] < 0) continue;
+
+                int curBlockSize = sizeOfBlocks[fsIds[checkIndex]];
+                if (isFreeSpaceToMove(fsIds, curBlockSize, checkIndex, out int moveToIndex )) {
+
+                    for (int i = 0; i < curBlockSize; i++) {
+                        fsIds[moveToIndex + i] = fsIds[checkIndex - i];
+                        fsIds[checkIndex - i] = -1;
+                    }                   
+                }
+                //skip the block because it either was moved or not
+                checkIndex -= (curBlockSize - 1);      
+            }            
+
+            long checkSum = 0;            
+            for (int i = 0; i < fsIds.Count; i++) {
+                if (fsIds[i] < 0) continue;
+                checkSum += fsIds[i] * i;
+            } 
+
+            print($"The checksum for the filesystem = {checkSum}");
         }
 
 
