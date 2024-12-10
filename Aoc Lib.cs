@@ -24,7 +24,15 @@ namespace CodeTAF
             public const int UP = 2;
             public const int LEFT = 3;
 
-            
+            public static (int x, int y) getOppositeDir((int x, int y) curDir) {
+                return (curDir.x * -1, curDir.y * -1);
+            }
+
+            public static (int x, int y) getOppositeDir(int curDirNum) {
+                return (Directions[curDirNum].x * -1, Directions[curDirNum].y * -1);
+            }
+
+
             public static (int x, int y) TurnAround((int x, int y) curDir) {
                 return TurnRight(TurnRight(curDir));
             }
