@@ -83,39 +83,56 @@ namespace CodeTAF
         // Value: number of valid hiking trails from this node. 
         Dictionary<((int x, int y) pos, (int x, int y) dir) , int> cachedNodes;
         int[,] heightMap;
+        (int x, int y) maxSize;
 
         (int x, int y)[] Directions = AocLib.Map.Directions;
+        
 
+        int findTrail((int x, int y) startPos, int curDirNum = -1, int prevHeight = -1 ) {
 
-
-        //Dictionary<(int posX, int posY, int dirX, int dirY), int> cachedNodes;
-
-        int findTrail((int x, int y) startPos, int curDirNum, int prevHeight ) {
-
+            (int x, int y) curDir = (curDirNum == -1) ? (0,0) : Directions[curDirNum];
+            int curHeight = heightMap[startPos.x, startPos.y];
             int numCorrectPaths = 0 ;
-            if (cachedNodes.TryGetValue((startPos, Directions[curDirNum]), out numCorrectPaths)) {
+
+            //check if valid next step in the path
+            if (curHeight != prevHeight + 1) { return 0; }
+            //since still valid path see if this part is cached
+            if (cachedNodes.TryGetValue((startPos, curDir), out numCorrectPaths)) {
                 return numCorrectPaths;
             }
-
-            int curHeight = heightMap[startPos.x, startPos.y];
-            if (curHeight != prevHeight + 1) { return 0; }
             //valid end to a trail
             if (heightMap[startPos.x, startPos.y] == 9) { return 1; }            
 
-
+            //check all other directions to see if path continues
             for (int i = 0; i < Directions.Length; i++) {
-                if (Directions[i] == AocLib.Map.getOppositeDir(curDirNum)) { continue; }
+                if (Directions[i] == AocLib.Map.getOppositeDir(curDir)) { continue; }
+                (int x, int y) nextPos = AocLib.Map.MoveForward(startPos, Directions[i]);
 
-                if (heightMap[s])
-
-
+                if (AocLib.Map.IsInBounds(nextPos,maxSize)) { 
+                    numCorrectPaths += findTrail(nextPos, i, curHeight);                
+                }
             }
-
-
+            //cache results of this node and return
+            cachedNodes[(startPos, curDir)] = numCorrectPaths;
+            return numCorrectPaths;
         }
 
-        void part1() {
-                       
+        void part1() {            
+            heightMap = AocLib.ParseSimpleIntMap(input);
+            maxSize = (heightMap.GetLength(0), heightMap.GetLength(1));
+            cachedNodes = new();
+
+            int trailScoreTotals = 0;
+
+            for (int col = 0; col < maxSize.x; col++) {
+                for (int row = 0; row < maxSize.y; row++) {
+                    if (heightMap[col,row] != 0) { continue; }
+
+                    trailScoreTotals += findTrail((col, row));
+                }
+            }
+
+            print($"Total of trail scores = {trailScoreTotals}");
 
         }
 
