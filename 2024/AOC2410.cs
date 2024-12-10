@@ -113,6 +113,36 @@ namespace CodeTAF
             return numCorrectPaths;
         }
 
+        int findTrail2((int x, int y) startPos, List<(int x, int y)> trailNodes, int curDirNum = -1, int prevHeight = -1) {
+
+            (int x, int y) curDir = (curDirNum == -1) ? (0, 0) : Directions[curDirNum];
+            int curHeight = heightMap[startPos.x, startPos.y];
+            int numCorrectPaths = 0;
+
+            (int score, List<(int x, int y)> nodes) result;
+            //check if valid next step in the path
+            if (curHeight != prevHeight + 1) { return 0; }
+
+            //valid end to a trail
+            if (heightMap[startPos.x, startPos.y] == 9) {
+                if (trailNodes.Contains(startPos)) { return 1; }
+                trailNodes.Add(startPos);
+                return 1;
+            }
+
+            //check all other directions to see if path continues
+            for (int i = 0; i < Directions.Length; i++) {
+                if (Directions[i] == AocLib.Map.getOppositeDir(curDir)) { continue; }
+                (int x, int y) nextPos = AocLib.Map.MoveForward(startPos, Directions[i]);
+
+                if (AocLib.Map.IsInBounds(nextPos, maxSize)) {
+                    int score = findTrail2(nextPos, trailNodes, i, curHeight);
+                    numCorrectPaths += score;
+                }
+            }
+            return numCorrectPaths;
+        }
+
         void part1() {            
             heightMap = AocLib.ParseSimpleIntMap(input);
             maxSize = (heightMap.GetLength(0), heightMap.GetLength(1));            
@@ -131,7 +161,19 @@ namespace CodeTAF
         }
 
         void part2() {
+            heightMap = AocLib.ParseSimpleIntMap(input);
+            maxSize = (heightMap.GetLength(0), heightMap.GetLength(1));
 
+            int trailScoreTotals = 0;
+            for (int row = 0; row < maxSize.y; row++) {
+                for (int col = 0; col < maxSize.x; col++) {
+                    if (heightMap[col, row] != 0) { continue; }
+                    var result = findTrail2((col, row), new List<(int x, int y)>());
+                    trailScoreTotals += result;
+                }
+            }
+
+            print($"Total of trail scores = {trailScoreTotals}");
 
         }
 
