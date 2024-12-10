@@ -139,6 +139,21 @@ namespace CodeTAF
             return output;
         }
 
+        public static int[,] ParseSimpleIntMap(string input, bool reverseMap = false) {
+            string[] mapLines = input.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+            if (reverseMap) { Array.Reverse(mapLines); }
+            int[,] output = new int[mapLines[0].Length, mapLines.Length];
+
+            for (int line = 0; line < mapLines.Length; line++) {
+                for (int col = 0; col < mapLines[line].Length; col++) {
+                    output[col, line] = mapLines[line][col] - '0';
+                }
+            }
+            return output;
+        }
+
+
+
         //prints to console the 2d array. can be reversed vertically and with tab spacing or now.
         public static void Print2d<T>(T[,] array2D, bool withTab = true, bool reverseMap = false) {
             //bool reverseMap = true;
