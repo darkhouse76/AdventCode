@@ -77,39 +77,25 @@ namespace CodeTAF
 
         /////////////////////////////////////////////////////////////////
         /// Everything above is for unity and getting the input files ///
-        /////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////        
         
-        // Key: (Node Position tuple, direction entered with (IE: came from the South to this northern Node. So give it North))
-        // Value: number of valid hiking trails from this node. 
-        Dictionary<(int x, int y), (int score, List<(int x, int y)>)> cachedNodes;
         int[,] heightMap;
         (int x, int y) maxSize;
         (int x, int y)[] Directions = AocLib.Map.Directions;
-
-
-        bool alreadyInTrail(List<(int x, int y)> trailNodes, List<(int x, int y)> checkNodes) {
-            foreach (var nodePos in trailNodes) {
-                if (checkNodes.Contains(nodePos)) return true;
-            }
-            return false;
-        }
 
         int findTrail((int x, int y) startPos, List<(int x, int y)> trailNodes, int curDirNum = -1, int prevHeight = -1 ) {
             
             (int x, int y) curDir = (curDirNum == -1) ? (0,0) : Directions[curDirNum];
             int curHeight = heightMap[startPos.x, startPos.y];            
             int numCorrectPaths = 0 ;
-            int cacheNum = 0;
+            
             (int score, List<(int x, int y)> nodes) result;
             //check if valid next step in the path
-            if (curHeight != prevHeight + 1) { return 0; }
-            //since still valid path see if this part is cached
-            //if (cachedNodes.TryGetValue(startPos, out result)) {
-                //return result;
-            //}
-            //trailNodes.Add(startPos);
+            if (curHeight != prevHeight + 1) { return 0; }         
+           
             //valid end to a trail
             if (heightMap[startPos.x, startPos.y] == 9) {
+                if (trailNodes.Contains(startPos)) { return 0; }
                 trailNodes.Add(startPos);
                 return 1; 
             }            
@@ -119,42 +105,24 @@ namespace CodeTAF
                 if (Directions[i] == AocLib.Map.getOppositeDir(curDir)) { continue; }
                 (int x, int y) nextPos = AocLib.Map.MoveForward(startPos, Directions[i]);
 
-                if (AocLib.Map.IsInBounds(nextPos,maxSize) && !trailNodes.Contains(nextPos)) {
-                    if (cachedNodes.TryGetValue(nextPos, out result)) {
-                        if(!alreadyInTrail(trailNodes,result.nodes)) {
-                            numCorrectPaths += result.score;
-                            trailNodes.AddRange(result.nodes);
-                        } else {
-                            cacheNum += result.score;
-                        }
-                        continue;
-                    } 
-                    
-                    int score = findTrail(nextPos, trailNodes, i, curHeight);
-                    //if (trailNodes.Contains(nextPos)) { continue; }
-                    numCorrectPaths += score;
-                    //if (score > 0) { trailNodes.Add(nextPos); }
+                if (AocLib.Map.IsInBounds(nextPos,maxSize)) {
+                    int score = findTrail(nextPos, trailNodes, i, curHeight);                    
+                    numCorrectPaths += score;                    
                 }
             }
-            //trailNodes.Add(startPos);
-            //cache results of this node and return
-            cachedNodes[startPos] = (numCorrectPaths + cacheNum, trailNodes);
             return numCorrectPaths;
         }
 
         void part1() {            
             heightMap = AocLib.ParseSimpleIntMap(input);
-            maxSize = (heightMap.GetLength(0), heightMap.GetLength(1));
-            cachedNodes = new();
+            maxSize = (heightMap.GetLength(0), heightMap.GetLength(1));            
 
-            int trailScoreTotals = 0;            
-
+            int trailScoreTotals = 0;
             for (int row = 0; row < maxSize.y; row++) {
                 for (int col = 0; col < maxSize.x; col++) {
                     if (heightMap[col,row] != 0) { continue; }
                     var result = findTrail((col, row), new List<(int x, int y)>());
-                    trailScoreTotals += result;
-                    print(result);
+                    trailScoreTotals += result;                    
                 }
             }
 
