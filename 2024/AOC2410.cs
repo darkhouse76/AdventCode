@@ -81,14 +81,13 @@ namespace CodeTAF
         
         // Key: (Node Position tuple, direction entered with (IE: came from the South to this northern Node. So give it North))
         // Value: number of valid hiking trails from this node. 
-        Dictionary<((int x, int y) pos, (int x, int y) dir) , int> cachedNodes;
+        Dictionary<(int x, int y), int> cachedNodes;
         int[,] heightMap;
         (int x, int y) maxSize;
+        (int x, int y)[] Directions = AocLib.Map.Directions;       
 
-        (int x, int y)[] Directions = AocLib.Map.Directions;
-        
 
-        int findTrail((int x, int y) startPos, int curDirNum = -1, int prevHeight = -1 ) {
+        int findTrail((int x, int y) startPos, List<(int x, int y)> trailNodes, int curDirNum = -1, int prevHeight = -1 ) {
 
             (int x, int y) curDir = (curDirNum == -1) ? (0,0) : Directions[curDirNum];
             int curHeight = heightMap[startPos.x, startPos.y];
@@ -97,7 +96,7 @@ namespace CodeTAF
             //check if valid next step in the path
             if (curHeight != prevHeight + 1) { return 0; }
             //since still valid path see if this part is cached
-            if (cachedNodes.TryGetValue((startPos, curDir), out numCorrectPaths)) {
+            if (cachedNodes.TryGetValue(startPos, out numCorrectPaths)) {
                 return numCorrectPaths;
             }
             //valid end to a trail
@@ -108,12 +107,14 @@ namespace CodeTAF
                 if (Directions[i] == AocLib.Map.getOppositeDir(curDir)) { continue; }
                 (int x, int y) nextPos = AocLib.Map.MoveForward(startPos, Directions[i]);
 
-                if (AocLib.Map.IsInBounds(nextPos,maxSize)) { 
-                    numCorrectPaths += findTrail(nextPos, i, curHeight);                
+                if (AocLib.Map.IsInBounds(nextPos,maxSize) && !trailNodes.Contains(nextPos)) {
+                    int result = findTrail(nextPos, trailNodes, i, curHeight);
+                    numCorrectPaths += result;
+                    if (result > 0) { trailNodes.Add(nextPos); }                    
                 }
             }
             //cache results of this node and return
-            cachedNodes[(startPos, curDir)] = numCorrectPaths;
+            cachedNodes[startPos] = numCorrectPaths;
             return numCorrectPaths;
         }
 
@@ -124,11 +125,15 @@ namespace CodeTAF
 
             int trailScoreTotals = 0;
 
-            for (int col = 0; col < maxSize.x; col++) {
-                for (int row = 0; row < maxSize.y; row++) {
-                    if (heightMap[col,row] != 0) { continue; }
+            AocLib.Print2d(heightMap);
+            print(heightMap[5, 6]);
 
-                    trailScoreTotals += findTrail((col, row));
+            for (int row = 0; row < maxSize.y; row++) {
+                for (int col = 0; col < maxSize.x; col++) {
+                    if (heightMap[col,row] != 0) { continue; }
+                    int result = findTrail((col, row), new List<(int x, int y)>());
+                    trailScoreTotals += result;
+                    //print(result);
                 }
             }
 
