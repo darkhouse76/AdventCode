@@ -86,8 +86,8 @@ namespace CodeTAF
         [SerializeField, Range(0, 8)]
         int baseStone = 0;
 
-        [SerializeField, Range(0, 10000)]
-        int workSizeMax = 10;
+        [SerializeField, Range(0, 1000000)]
+        int workSizeMax = 500000;
 
 
         List<long> blink(List<long> curStones ) {
@@ -116,7 +116,41 @@ namespace CodeTAF
             return newStones;
         }
 
-            
+        Dictionary<long,long> blink2(Dictionary<long,long> curStones) {
+            Dictionary<long,long> newStones = new Dictionary<long,long>();
+
+            foreach (KeyValuePair<long,long> stone in curStones) {
+                //if 0 then make 1
+                if (stone.Key == 0) {
+                    if (!newStones.TryAdd(1, stone.Value)) {
+                        newStones[1] += stone.Value;
+                    }                                       
+                    continue;
+                }
+
+                int numDigits = AocLib.numberOfDigits(stone.Key);
+                //if even digits then split
+                if (numDigits % 2 == 0) {
+                    long div = (long)Math.Pow(10, AocLib.numberOfDigits(stone.Key) / 2);
+                    long stone1 = (stone.Key / div);
+                    long stone2 = (stone.Key % div);
+                    if (!newStones.TryAdd(stone1, stone.Value)) {
+                        newStones[stone1] += stone.Value;
+                    }
+                    if (!newStones.TryAdd(stone2, stone.Value)) {
+                        newStones[stone2] += stone.Value;
+                    }                                       
+                    continue;
+                }
+
+                //otherwise time 2024
+                if (!newStones.TryAdd((stone.Key * 2024), stone.Value)) {
+                    newStones[(stone.Key * 2024)] += stone.Value;
+                }
+            }            
+            return newStones;
+        }
+
 
 
         void part1() {
@@ -130,28 +164,31 @@ namespace CodeTAF
 
         }
 
-        void part25() {
+        void part2() {
             //new list every time                       
             List<long> allStones = new(AocLib.parseInputToLong(input, " "));
             //long prevNumStones = 0;
 
             long totalStones = 0;
 
+            Dictionary<long, long> stones = new();
+
             foreach (var stone in  allStones) {
-                List<long> stones = new List<long> { stone };
-                for (int i = 0; i < amountBlinks; i++) {
-                    stones = blink(stones);
-                    //print($"{i} : {stones.Count - prevNumStones}");
-                    //prevNumStones = stones.Count;
-                }
-                totalStones += stones.Count;
+                stones[stone] = 1;                
+            }
+            for (int i = 0; i < amountBlinks; i++) {
+                stones = blink2(stones);                    
+            } 
+            
+            foreach (var stone in stones) {
+                totalStones += stone.Value;
             }
 
             print($"Number of stones after {amountBlinks} blinks = {totalStones}");
 
         }
 
-        void part2() {
+        void part2old() {
             /*
             for (int i = 10; i > 0; i--) {
                 print(i);
@@ -160,7 +197,7 @@ namespace CodeTAF
                 }
             }
             return;
-            */
+            */            
 
             //new list every time                       
             List<long> allStones = new(AocLib.parseInputToLong(input, " "));
