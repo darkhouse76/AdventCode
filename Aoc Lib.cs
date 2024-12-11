@@ -222,5 +222,102 @@ namespace CodeTAF
             return parseInputToInt(input, new string[] { arg1, arg2 });            
         }
 
+        public static long[] parseInputToLong(string input, string[] separators) {
+            string[] stringArray = input.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+            return Array.ConvertAll(stringArray, Int64.Parse);
+        }
+
+        public static long[] parseInputToLong(string input, string arg1) {
+            return parseInputToLong(input, new string[] { arg1 });
+        }
+
+        public static long[] parseInputToLong(string input, string arg1, string arg2) {
+            return parseInputToLong(input, new string[] { arg1, arg2 });
+        }
+
+
+        public static int numberOfDigits(int number) {
+
+            if (number >= 0) {
+                switch (number) {
+                    case < 10: return 1;
+                    case < 100: return 2;
+                    case < 1000: return 3;
+                    case < 10000: return 4;
+                    case < 100000: return 5;
+                    case < 1000000: return 6;
+                    case < 10000000: return 7;
+                    case < 100000000: return 8;
+                    case < 1000000000: return 9;
+                    default: return 10;
+                }                
+            }
+            else {
+                switch (number) {
+                    case > -10: return 2;
+                    case > -100: return 3;
+                    case > -1000: return 4;
+                    case > -10000: return 5;
+                    case > -100000: return 6;
+                    case > -1000000: return 7;
+                    case > -10000000: return 8;
+                    case > -100000000: return 9;
+                    case > -1000000000: return 10;
+                    default: return 11;
+                }                
+            }
+        }
+
+        public static int numberOfDigits(long number) {
+
+            if (number >= 0) {
+                switch (number) {
+                    case < 10L: return 1;
+                    case < 100L: return 2;
+                    case < 1000L: return 3;
+                    case < 10000L: return 4;
+                    case < 100000L: return 5;
+                    case < 1000000L: return 6;
+                    case < 10000000L: return 7;
+                    case < 100000000L: return 8;
+                    case < 1000000000L: return 9;
+                    case < 10000000000L: return 10;
+                    case < 100000000000L: return 11;
+                    case < 1000000000000L: return 12;
+                    case < 10000000000000L: return 13;
+                    case < 100000000000000L: return 14;
+                    case < 1000000000000000L: return 15;
+                    case < 10000000000000000L: return 16;
+                    case < 100000000000000000L: return 17;
+                    case < 1000000000000000000L: return 18;                    
+                    default: return 19;
+                }
+            }
+            else {
+                switch (number) {
+                    case > -10L: return 2;
+                    case > -100L: return 3;
+                    case > -1000L: return 4;
+                    case > -10000L: return 5;
+                    case > -100000L: return 6;
+                    case > -1000000L: return 7;
+                    case > -10000000L: return 8;
+                    case > -100000000L: return 9;
+                    case > -1000000000L: return 10;
+                    case > -10000000000L: return 11;
+                    case > -100000000000L: return 12;
+                    case > -1000000000000L: return 13;
+                    case > -10000000000000L: return 14;
+                    case > -100000000000000L: return 15;
+                    case > -1000000000000000L: return 16;
+                    case > -10000000000000000L: return 17;
+                    case > -100000000000000000L: return 18;
+                    case > -1000000000000000000L: return 19;
+                    default: return 20;
+                }
+            }
+        }
+
+
     }
 }
