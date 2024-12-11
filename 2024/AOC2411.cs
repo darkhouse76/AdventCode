@@ -80,8 +80,14 @@ namespace CodeTAF
         /// Everything above is for unity and getting the input files ///
         /////////////////////////////////////////////////////////////////
 
-        [SerializeField, Range(0, 25)]
+        [SerializeField, Range(0, 75)]
         int amountBlinks = 25;
+
+        [SerializeField, Range(0, 8)]
+        int baseStone = 0;
+
+        [SerializeField, Range(0, 10000)]
+        int workSizeMax = 10;
 
 
         List<long> blink(List<long> curStones ) {
@@ -115,19 +121,90 @@ namespace CodeTAF
 
         void part1() {
             //new list every time                       
-            List<long> stones = new(AocLib.parseInputToLong(input, " ")); 
-
+            List<long> stones = new(AocLib.parseInputToLong(input, " "));            
             for (int i = 0; i < amountBlinks; i++) {
-                stones = blink(stones);
-                //print(stones.Count);
+                stones = blink(stones);                
             }
             
             print($"Number of stones after {amountBlinks} blinks = {stones.Count}");
 
         }
 
-        void part2() {
+        void part25() {
+            //new list every time                       
+            List<long> allStones = new(AocLib.parseInputToLong(input, " "));
+            //long prevNumStones = 0;
 
+            long totalStones = 0;
+
+            foreach (var stone in  allStones) {
+                List<long> stones = new List<long> { stone };
+                for (int i = 0; i < amountBlinks; i++) {
+                    stones = blink(stones);
+                    //print($"{i} : {stones.Count - prevNumStones}");
+                    //prevNumStones = stones.Count;
+                }
+                totalStones += stones.Count;
+            }
+
+            print($"Number of stones after {amountBlinks} blinks = {totalStones}");
+
+        }
+
+        void part2() {
+            /*
+            for (int i = 10; i > 0; i--) {
+                print(i);
+                if (i == 7) {
+                    print("split here = " + (i - 1));
+                }
+            }
+            return;
+            */
+
+            //new list every time                       
+            List<long> allStones = new(AocLib.parseInputToLong(input, " "));
+            //long prevNumStones = 0;
+
+            long totalStones = 0;
+            List<long> remainingStones = new List<long>();
+            List<int> numberOfBlinksLeft = new List<int>();
+
+            foreach ( var stone in allStones) { 
+                remainingStones.Add(stone);
+                numberOfBlinksLeft.Add(amountBlinks);
+            }
+
+            //remainingStones.Add(allStones[baseStone]);
+            //numberOfBlinksLeft.Add(amountBlinks);
+
+            while (remainingStones.Count > 0 ) {
+                int lastIndex = remainingStones.Count - 1;
+                List<long> stones = new List<long> { remainingStones[lastIndex] };                
+                remainingStones.RemoveAt(lastIndex);
+                int remainingBlinks = numberOfBlinksLeft[lastIndex];
+                numberOfBlinksLeft.RemoveAt(lastIndex);
+
+                for (int i = remainingBlinks; i > 0; i--) {
+                    stones = blink(stones);
+                    //if got through all the blinks remaining then count them and move on
+                    if ( i == 1 ) { 
+                        totalStones += stones.Count; 
+                        break; 
+                    }
+                    //if the amount of stones are too big to work. Then store the stones and work with one. 
+                    if ( stones.Count > workSizeMax) {
+                        foreach (var stone in stones) {
+                            remainingStones.Add(stone);
+                            numberOfBlinksLeft.Add(i - 1);
+                        }
+                        break;
+                    }                    
+                }                
+            }         
+            
+
+            print($"Number of stones after {amountBlinks} blinks = {totalStones}");
 
         }
 
