@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -78,9 +79,57 @@ namespace CodeTAF
         /// Everything above is for unity and getting the input files ///
         /////////////////////////////////////////////////////////////////
 
+        char[,] garden;
+        (int x, int y) maxSize;
+        (int x, int y)[] Directions = AocLib.Map.Directions;
+        List<(int x, int y)> allRegionPosChecked;
+        List<(int x, int y)> region;
+        //int[,] debugParimeter;
+
+
+        int findRegion((int x, int y) startPos) {
+            char targetPlant = garden[startPos.x, startPos.y];
+            int perimeter = 0;
+
+            region.Add(startPos);
+
+            for (int i = 0; i < Directions.Length; i++) {
+                (int x, int y) nextPos = AocLib.Map.MoveForward(startPos, Directions[i]);
+                if (region.Contains(nextPos)) { continue; }
+
+                if (!AocLib.Map.IsInBounds(nextPos, maxSize) || garden[nextPos.x, nextPos.y] != targetPlant) {
+                    perimeter++;                    
+                } else {
+                    perimeter += findRegion(nextPos);
+                } 
+            }
+            //debugParimeter[startPos.x,startPos.y] = perimeter;
+            return perimeter;
+        }
+
+
         void part1() {
+            garden = AocLib.ParseSimpleCharMap(input);
+            maxSize = (garden.GetLength(0),  garden.GetLength(1));
+            allRegionPosChecked = new();
+            //debugParimeter = new int[maxSize.x,maxSize.y];
+            int priceTotal = 0;
 
+            for (int row = 0; row < maxSize.y; row++) {
+                for (int col = 0; col < maxSize.x; col++) {
+                    if (allRegionPosChecked.Contains((col,row))) {  continue; }
 
+                    region = new();
+                    int perimeter = findRegion((col,row));
+                    //print($"{garden[col,row]} : {region.Count} X {perimeter} = {perimeter * region.Count}");
+                    //price  = perimeter * area
+                    priceTotal += (perimeter * region.Count);
+                    allRegionPosChecked.AddRange(region);
+                }
+            }
+
+            print($"Total Cost of fencing for part 1 = {priceTotal}");
+            //AocLib.Print2d(debugParimeter);
         }
 
         void part2() {
