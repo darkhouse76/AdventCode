@@ -84,6 +84,7 @@ namespace CodeTAF
         (int x, int y)[] Directions = AocLib.Map.Directions;
         List<(int x, int y)> allRegionPosChecked;
         List<(int x, int y)> region;
+        List<((int x, int y), (int x, int y))> sides;
         //int[,] debugParimeter;
 
 
@@ -105,6 +106,48 @@ namespace CodeTAF
             }
             //debugParimeter[startPos.x,startPos.y] = perimeter;
             return perimeter;
+        }
+
+        int findRegion2((int x, int y) startPos) {
+            char targetPlant = garden[startPos.x, startPos.y];
+            int perimeter = 0;
+
+            region.Add(startPos);
+
+            for (int i = 0; i < Directions.Length; i++) {
+                (int x, int y) nextPos = AocLib.Map.MoveForward(startPos, Directions[i]);
+                if (region.Contains(nextPos)) { continue; }
+
+                if (!AocLib.Map.IsInBounds(nextPos, maxSize) || garden[nextPos.x, nextPos.y] != targetPlant) {
+                    if (sides.Contains((nextPos, Directions[i]))) { continue; }
+
+                    perimeter++;
+                    findSide(startPos, Directions[i]);                    
+                }
+                else {
+                    perimeter += findRegion2(nextPos);
+                }
+            }
+            //debugParimeter[startPos.x,startPos.y] = perimeter;
+            return perimeter;
+        }
+
+        void findSide((int x, int y) startPos, (int x, int y) curDir) {
+            char targetPlant = garden[startPos.x, startPos.y];
+            (int x, int y) searchDir = AocLib.Map.TurnRight(curDir);
+            (int x, int y) curPos = startPos;
+            (int x, int y) sidePos = AocLib.Map.MoveForward(curPos, curDir);
+
+            for (int i = 0; i < 2; i++) {
+                do {
+                    sides.Add((sidePos, curDir));
+                    curPos = AocLib.Map.MoveForward(curPos, searchDir);
+                    sidePos = AocLib.Map.MoveForward(curPos, curDir);
+                } while (AocLib.Map.IsInBounds(curPos, maxSize) && garden[curPos.x, curPos.y] == targetPlant && 
+                        (!AocLib.Map.IsInBounds(sidePos,maxSize) || garden[sidePos.x, sidePos.y] != targetPlant));
+                searchDir = AocLib.Map.TurnLeft(curDir);
+                curPos = startPos;
+            }            
         }
 
 
@@ -133,7 +176,28 @@ namespace CodeTAF
         }
 
         void part2() {
+            garden = AocLib.ParseSimpleCharMap(input);
+            maxSize = (garden.GetLength(0), garden.GetLength(1));
+            allRegionPosChecked = new();
+            
 
+
+            int priceTotal = 0;
+
+            for (int row = 0; row < maxSize.y; row++) {
+                for (int col = 0; col < maxSize.x; col++) {
+                    if (allRegionPosChecked.Contains((col, row))) { continue; }
+                    region = new();
+                    sides = new();
+                    int perimeter = findRegion2((col, row));
+                    //print($"{garden[col,row]} : {region.Count} X {perimeter} = {perimeter * region.Count}");
+                    //price  = perimeter * area
+                    priceTotal += (perimeter * region.Count);
+                    allRegionPosChecked.AddRange(region);
+                }
+            }
+
+            print($"Total Cost of fencing for part 2 = {priceTotal}");            
 
         }
 
