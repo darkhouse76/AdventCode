@@ -221,7 +221,8 @@ namespace CodeTAF
         public static int[] parseInputToInt(string input, string arg1, string arg2) {
             return parseInputToInt(input, new string[] { arg1, arg2 });            
         }
-
+        //parses everything into numbers and then converts to long array. 
+        //overloads include string array or 1 string or 2 strings.
         public static long[] parseInputToLong(string input, string[] separators) {
             string[] stringArray = input.Split(separators, StringSplitOptions.RemoveEmptyEntries);
             return Array.ConvertAll(stringArray, Int64.Parse);
@@ -235,7 +236,8 @@ namespace CodeTAF
             return parseInputToLong(input, new string[] { arg1, arg2 });
         }
 
-
+        //returns the numberOf digits in either a int or long.
+        //Note: this is one of the faster ways to do this. There are "shorter lines" ways.
         public static int numberOfDigits(int number) {
 
             if (number >= 0) {
