@@ -230,68 +230,21 @@ namespace CodeTAF
                 this.buttonA = buttonA;
                 this.buttonB = buttonB;
                 this.prizePos = prizePos;
-            }            
-
+            }
+            //used Cramer's Rule after learning it again. REF: https://www.youtube.com/watch?v=vXqlIOX2itM
             public long getMinimalTokens() {
-                (bool x, bool y) isCostEffective = (buttonA.x > (buttonB.x * 3), buttonA.y > (buttonB.y * 3));
+
+                long derivative = (buttonA.x * buttonB.y) - (buttonB.x * buttonA.y);
+                long derivativeA = (prizePos.x * buttonB.y) - (buttonB.x * prizePos.y);
+                long derivativeB = (buttonA.x * prizePos.y) - (prizePos.x * buttonA.y);
 
 
-                if (isCostEffective.x) {
-                    long pushesOfB;
-                    long startingAmt = prizePos.x / buttonA.x;
-                    //startingAmt = (startingAmt > 100) ? 100 : startingAmt;
+                long amtPushA = (derivativeA % derivative == 0) ? (derivativeA / derivative) : -1;
+                long amtPushB = (derivativeB % derivative == 0) ? (derivativeB / derivative) : -1;
+                
+                if (amtPushA < 0 || amtPushB < 0) { return 0; }
 
-                    for (long pushesOfA = startingAmt; pushesOfA >= 0; pushesOfA--) {
-                        long xPos = buttonA.x * pushesOfA;
-                        long yPos = buttonA.y * pushesOfA;
-
-                        pushesOfB = (prizePos.y - yPos) / buttonB.y;
-                        //if (pushesOfB > 100) { return 0; } //might need to watch that this is creating too early out
-
-                        if (((prizePos.y - yPos) % buttonB.y) == 0 && (xPos + (buttonB.x * pushesOfB) == prizePos.x)) {
-                            //found winning solution....should be the cheapest.....
-                            return (pushesOfA * buttonACost) + (pushesOfB * buttonBCost);
-                        }
-                    }
-
-                }
-                else if (isCostEffective.y) {
-                    long pushesOfB;
-                    long startingAmt = prizePos.y / buttonA.y;
-                    //startingAmt = (startingAmt > 100) ? 100 : startingAmt;
-
-                    for (long pushesOfA = startingAmt; pushesOfA >= 0; pushesOfA--) {
-                        long xPos = buttonA.x * pushesOfA;
-                        long yPos = buttonA.y * pushesOfA;
-
-                        pushesOfB = (prizePos.x - xPos) / buttonB.x;
-                        //if (pushesOfB > 100) { return 0; } //might need to watch that this is creating too early out
-
-                        if (((prizePos.x - xPos) % buttonB.x) == 0 && (yPos + (buttonB.y * pushesOfB) == prizePos.y)) {
-                            //found winning solution....should be the cheapest.....
-                            return (pushesOfA * buttonACost) + (pushesOfB * buttonBCost);
-                        }
-                    }
-                }
-                else {
-                    long pushesOfA;
-                    long startingAmt = prizePos.x / buttonB.x;
-                    //startingAmt = (startingAmt > 100) ? 100 : startingAmt;
-
-                    for (long pushesOfB = startingAmt; pushesOfB >= 0; pushesOfB--) {
-                        long xPos = buttonB.x * pushesOfB;
-                        long yPos = buttonB.y * pushesOfB;
-
-                        pushesOfA = (prizePos.y - yPos) / buttonA.y;
-                        //if (pushesOfA > 100) { return 0; } //might need to watch that this is creating too early out
-
-                        if (((prizePos.y - yPos) % buttonA.y) == 0 && (xPos + (buttonA.x * pushesOfA) == prizePos.x)) {
-                            //found winning solution....should be the cheapest.....
-                            return (pushesOfA * buttonACost) + (pushesOfB * buttonBCost);
-                        }
-                    }
-                }
-                return 0;
+                return (amtPushA * buttonACost) + (amtPushB * buttonBCost);
             }
         }
 
@@ -330,13 +283,6 @@ namespace CodeTAF
             List<clawMachine2> allMachines = new();
             const long prizePosMod = 10000000000000L;
 
-
-            var testMachine = new clawMachine2((26, 66), (67, 21), (12748 + prizePosMod, 12176 + prizePosMod));
-
-            print(testMachine.getMinimalTokens());
-
-            return;
-
             //this feel sloppy to parse but here I am lol. 
             foreach (Match numbers in numbersStr) {
                 allNumbers.Add(int.Parse(numbers.Value));
@@ -345,10 +291,10 @@ namespace CodeTAF
             for (int i = 0; i < allNumbers.Count; i += 6) {
                 var buttonASetting = (allNumbers[i], allNumbers[i + 1]);
                 var buttonBSetting = (allNumbers[i + 2], allNumbers[i + 3]);
-                var prizePos = (allNumbers[i + 4] + prizePosMod, allNumbers[i + 5] + prizePosMod);
+                var prizePos = (allNumbers[i + 4] + prizePosMod, allNumbers[i + 5] + prizePosMod);                
 
                 allMachines.Add(new clawMachine2(buttonASetting, buttonBSetting, prizePos));
-            }
+            }            
 
             long totalTokenMinimal = 0;
 
