@@ -153,7 +153,146 @@ namespace CodeTAF
                 return 0;
             }
 
+            public int getMinimalTokens2() {
+                (bool x, bool y) isCostEffective = (buttonA.x > (buttonB.x * 3), buttonA.y > (buttonB.y * 3));
 
+
+                if (isCostEffective.x) {
+                    int pushesOfB;
+                    int startingAmt = prizePos.x / buttonA.x;
+                    //startingAmt = (startingAmt > 100) ? 100 : startingAmt;
+
+                    for (int pushesOfA = startingAmt; pushesOfA >= 0; pushesOfA--) {
+                        int xPos = buttonA.x * pushesOfA;
+                        int yPos = buttonA.y * pushesOfA;
+
+                        pushesOfB = (prizePos.y - yPos) / buttonB.y;
+                        //if (pushesOfB > 100) { return 0; } //might need to watch that this is creating too early out
+
+                        if (((prizePos.y - yPos) % buttonB.y) == 0 && (xPos + (buttonB.x * pushesOfB) == prizePos.x)) {
+                            //found winning solution....should be the cheapest.....
+                            return (pushesOfA * buttonACost) + (pushesOfB * buttonBCost);
+                        }
+                    }
+
+                }
+                else if (isCostEffective.y) {
+                    int pushesOfB;
+                    int startingAmt = prizePos.y / buttonA.y;
+                    //startingAmt = (startingAmt > 100) ? 100 : startingAmt;
+
+                    for (int pushesOfA = startingAmt; pushesOfA >= 0; pushesOfA--) {
+                        int xPos = buttonA.x * pushesOfA;
+                        int yPos = buttonA.y * pushesOfA;
+
+                        pushesOfB = (prizePos.x - xPos) / buttonB.x;
+                        //if (pushesOfB > 100) { return 0; } //might need to watch that this is creating too early out
+
+                        if (((prizePos.x - xPos) % buttonB.x) == 0 && (yPos + (buttonB.y * pushesOfB) == prizePos.y)) {
+                            //found winning solution....should be the cheapest.....
+                            return (pushesOfA * buttonACost) + (pushesOfB * buttonBCost);
+                        }
+                    }
+                }
+                else {
+                    int pushesOfA;
+                    int startingAmt = prizePos.x / buttonB.x;
+                    //startingAmt = (startingAmt > 100) ? 100 : startingAmt;
+
+                    for (int pushesOfB = startingAmt; pushesOfB >= 0; pushesOfB--) {
+                        int xPos = buttonB.x * pushesOfB;
+                        int yPos = buttonB.y * pushesOfB;
+
+                        pushesOfA = (prizePos.y - yPos) / buttonA.y;
+                        //if (pushesOfA > 100) { return 0; } //might need to watch that this is creating too early out
+
+                        if (((prizePos.y - yPos) % buttonA.y) == 0 && (xPos + (buttonA.x * pushesOfA) == prizePos.x)) {
+                            //found winning solution....should be the cheapest.....
+                            return (pushesOfA * buttonACost) + (pushesOfB * buttonBCost);
+                        }
+                    }
+                }
+                return 0;
+            }
+
+
+        }
+
+        class clawMachine2
+        {
+            (int x, int y) buttonA;
+            (int x, int y) buttonB;
+            (long x, long y) prizePos;
+            int buttonACost = 3;
+            int buttonBCost = 1;
+
+            public clawMachine2((int x, int y) buttonA, (int x, int y) buttonB, (long x, long y) prizePos) {
+                this.buttonA = buttonA;
+                this.buttonB = buttonB;
+                this.prizePos = prizePos;
+            }            
+
+            public long getMinimalTokens() {
+                (bool x, bool y) isCostEffective = (buttonA.x > (buttonB.x * 3), buttonA.y > (buttonB.y * 3));
+
+
+                if (isCostEffective.x) {
+                    long pushesOfB;
+                    long startingAmt = prizePos.x / buttonA.x;
+                    //startingAmt = (startingAmt > 100) ? 100 : startingAmt;
+
+                    for (long pushesOfA = startingAmt; pushesOfA >= 0; pushesOfA--) {
+                        long xPos = buttonA.x * pushesOfA;
+                        long yPos = buttonA.y * pushesOfA;
+
+                        pushesOfB = (prizePos.y - yPos) / buttonB.y;
+                        //if (pushesOfB > 100) { return 0; } //might need to watch that this is creating too early out
+
+                        if (((prizePos.y - yPos) % buttonB.y) == 0 && (xPos + (buttonB.x * pushesOfB) == prizePos.x)) {
+                            //found winning solution....should be the cheapest.....
+                            return (pushesOfA * buttonACost) + (pushesOfB * buttonBCost);
+                        }
+                    }
+
+                }
+                else if (isCostEffective.y) {
+                    long pushesOfB;
+                    long startingAmt = prizePos.y / buttonA.y;
+                    //startingAmt = (startingAmt > 100) ? 100 : startingAmt;
+
+                    for (long pushesOfA = startingAmt; pushesOfA >= 0; pushesOfA--) {
+                        long xPos = buttonA.x * pushesOfA;
+                        long yPos = buttonA.y * pushesOfA;
+
+                        pushesOfB = (prizePos.x - xPos) / buttonB.x;
+                        //if (pushesOfB > 100) { return 0; } //might need to watch that this is creating too early out
+
+                        if (((prizePos.x - xPos) % buttonB.x) == 0 && (yPos + (buttonB.y * pushesOfB) == prizePos.y)) {
+                            //found winning solution....should be the cheapest.....
+                            return (pushesOfA * buttonACost) + (pushesOfB * buttonBCost);
+                        }
+                    }
+                }
+                else {
+                    long pushesOfA;
+                    long startingAmt = prizePos.x / buttonB.x;
+                    //startingAmt = (startingAmt > 100) ? 100 : startingAmt;
+
+                    for (long pushesOfB = startingAmt; pushesOfB >= 0; pushesOfB--) {
+                        long xPos = buttonB.x * pushesOfB;
+                        long yPos = buttonB.y * pushesOfB;
+
+                        pushesOfA = (prizePos.y - yPos) / buttonA.y;
+                        //if (pushesOfA > 100) { return 0; } //might need to watch that this is creating too early out
+
+                        if (((prizePos.y - yPos) % buttonA.y) == 0 && (xPos + (buttonA.x * pushesOfA) == prizePos.x)) {
+                            //found winning solution....should be the cheapest.....
+                            return (pushesOfA * buttonACost) + (pushesOfB * buttonBCost);
+                        }
+                    }
+                }
+                return 0;
+            }
         }
 
         void part1() {
@@ -186,7 +325,38 @@ namespace CodeTAF
         }
 
         void part2() {
+            var numbersStr = Regex.Matches(input, @"\d+");
+            List<int> allNumbers = new();
+            List<clawMachine2> allMachines = new();
+            const long prizePosMod = 10000000000000L;
 
+
+            var testMachine = new clawMachine2((26, 66), (67, 21), (12748 + prizePosMod, 12176 + prizePosMod));
+
+            print(testMachine.getMinimalTokens());
+
+            return;
+
+            //this feel sloppy to parse but here I am lol. 
+            foreach (Match numbers in numbersStr) {
+                allNumbers.Add(int.Parse(numbers.Value));
+            }
+
+            for (int i = 0; i < allNumbers.Count; i += 6) {
+                var buttonASetting = (allNumbers[i], allNumbers[i + 1]);
+                var buttonBSetting = (allNumbers[i + 2], allNumbers[i + 3]);
+                var prizePos = (allNumbers[i + 4] + prizePosMod, allNumbers[i + 5] + prizePosMod);
+
+                allMachines.Add(new clawMachine2(buttonASetting, buttonBSetting, prizePos));
+            }
+
+            long totalTokenMinimal = 0;
+
+            foreach (var machine in allMachines) {
+                totalTokenMinimal += machine.getMinimalTokens();
+            }
+
+            print($"Minimal amount of tokens need = {totalTokenMinimal}");
 
         }
 
