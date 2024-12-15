@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Schema;
 using UnityEditor;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 
 namespace CodeTAF
@@ -72,21 +73,61 @@ namespace CodeTAF
 
                 var startTime = System.DateTime.Now;
 
-                if (partTwo) { part2(); }
-                else { part1(); }
+                
+                if (partTwo) { 
+                    part2();
+
+                    Print2d(visMap);
+                    print("--------------------------------");
+                    Print2d(visMap, false);
+                    print($"^^^^^ This was for {secondsInFuture} secs ^^^^^");
+
+                    drawRobots();
+                    secondsInFuture++;
+                }
+                else { part1(); }                
                 print($"Took {System.DateTime.Now - startTime} to complete.");
+            }
+
+            if (scan) {
+                if (updateRobotPos()) {
+                    Print2d(visMap);
+                    print("--------------------------------");
+                    Print2d(visMap, false);
+                    print($"^^^^^ This was for {secondsInFuture} secs ^^^^^");
+
+                    drawRobots();
+                    scan = false;
+                }
+                if (secondsInFuture++ > 11000) { scan = false; }                
             }
         }
 
         /////////////////////////////////////////////////////////////////
         /// Everything above is for unity and getting the input files ///
         /////////////////////////////////////////////////////////////////
+        
+        [SerializeField]
+        GameObject ground;
+        [SerializeField]
+        GameObject robotObj;
+        [SerializeField]
+        Transform parentTarget;
+
+        [SerializeField, Range(1, 30)]
+        int scanThreshold = 10;
 
         [SerializeField]
-        int secondsInFuture = 100;
+        int secondsInFuture = 100; //the part to answer is at 6644 seconds
+        [SerializeField]
+        bool scan = false;
+
 
         static (int x, int y) maxSize;
         (int minX, int minY, int maxX, int maxY)[] quadrantBounds;
+        List<GameObject> allRobotObjs;
+        List<robot> allRobots;
+        int[,] visMap;
 
         class robot {
 
@@ -110,6 +151,13 @@ namespace CodeTAF
             } 
         }
 
+        void clearAllObjs() {
+            if (allRobotObjs == null) { return; }
+            foreach (GameObject obj in allRobotObjs) {
+                GameObject.Destroy(obj);
+            }
+        }
+
         int getQuadrant((int x, int y) pos) {
             for (int i = 0; i < quadrantBounds.Length; i++) {
                 if (quadrantBounds[i].minX <= pos.x && pos.x < quadrantBounds[i].maxX && 
@@ -119,6 +167,51 @@ namespace CodeTAF
                 }
             }
             return -1;
+        }
+
+        static void Print2d<T>(T[,] array2D, bool withTab = true) {         
+
+            for (int row = 0; row < array2D.GetLength(1); row++) {
+                string textRow = "";
+                for (int col = 0; col < array2D.GetLength(0); col++) {
+                    if (withTab) { textRow += "\t"; }
+                    textRow += (array2D[col, row].Equals(0)) ? ". " : array2D[col, row] + " ";
+                }
+                print(textRow);
+            }
+        }
+
+        void drawRobots() {
+
+            clearAllObjs();
+            allRobotObjs = new List<GameObject>();
+            for (int row = 0; row < maxSize.y; row++) {
+                for (int col = 0; col < maxSize.x; col++) {
+                    if (visMap[col, row] > 0) { allRobotObjs.Add(Instantiate(robotObj, new Vector3(col, row*-1, 0) + parentTarget.position, Quaternion.identity, parentTarget)); }
+                }
+            }
+
+
+        }
+
+        bool updateRobotPos() {
+            
+            visMap = new int[maxSize.x, maxSize.y];
+
+            foreach (var bot in allRobots) {
+                var futurePos = bot.getFuturePos(secondsInFuture);                
+                visMap[futurePos.x, futurePos.y]++;
+            }
+            
+            for (int col = 0; col < maxSize.x; col++) {
+                int count = 0;
+                for (int row = 0; row < maxSize.y; row++) {
+                    count += visMap[col, row];
+                }
+                if (count > scanThreshold) { return true; }
+            }
+
+            return false;
         }
 
 
@@ -170,6 +263,27 @@ namespace CodeTAF
 
         void part2() {
 
+            maxSize = useTestInput ? (11, 7) : (101, 103);
+
+            //ground.transform.position.Set(parentTarget.position.x,parentTarget.position.y, parentTarget.position.z);
+            ground.transform.localScale = new Vector3Int(maxSize.x, maxSize.y);
+
+            int wideDiv = (maxSize.x / 2);
+            int tallDiv = (maxSize.y / 2);
+
+
+            //look at the cool regex lol
+            var robotInputs = Regex.Matches(input, @"p=(?<posX>\d+|-\d+),(?<posY>\d+|-\d+) v=(?<velX>\d+|-\d+),(?<velY>\d+|-\d+)");            
+            allRobots = new();
+            robot.TotalRobots = 0;
+
+            foreach (Match robotInput in robotInputs) {
+                (int x, int y) pos = (int.Parse(robotInput.Groups["posX"].Value), int.Parse(robotInput.Groups["posY"].Value));
+                (int x, int y) vel = (int.Parse(robotInput.Groups["velX"].Value), int.Parse(robotInput.Groups["velY"].Value));
+                allRobots.Add(new robot(pos, vel));
+            }
+
+            updateRobotPos(); 
 
         }
 

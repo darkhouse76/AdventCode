@@ -887,9 +887,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56ef6ee1c2e464749958612621ef0df1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  partTwo: 0
-  useTestInput: 1
+  partTwo: 1
+  useTestInput: 0
   run: 0
+  ground: {fileID: 1222769087}
+  robotObj: {fileID: 1587012761}
+  parentTarget: {fileID: 1746876722}
+  secondsInFuture: 5
+  scan: 0
 --- !u!114 &820830675
 MonoBehaviour:
   m_ObjectHideFlags: 0

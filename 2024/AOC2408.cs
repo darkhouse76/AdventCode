@@ -153,6 +153,8 @@ namespace CodeTAF
                     }
                 }
             }
+
+
             print($"Number of antinodes found on map = {antiNodes.Count}");
         }
 
