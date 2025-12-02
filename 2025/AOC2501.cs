@@ -84,33 +84,58 @@ namespace CodeTAF
             return -1;
         }
 
-        int RotateDial(int dialStartPoint, int ticks, int directionMod = 1) {
+        (int,int) RotateDial(int dialStartPoint, int ticks, int directionMod = 1) {
             int dialPoint = dialStartPoint;
+            int zeroCount = 0;
 
-            dialPoint = (dialPoint + (ticks * directionMod)) % 100;
+
+            //if start point is within -+ of num ticks from 0
+
+            if ((dialStartPoint <= ticks && directionMod == -1) || 
+                (dialStartPoint >= 100-ticks && directionMod == 1)) {
+
+                print("ZERO Enocunter");
+            } 
+
             
-            return (dialPoint < 0) ? 100 + dialPoint : dialPoint;
+
+
+            dialPoint = dialPoint + (ticks * directionMod);
+            zeroCount += Math.Abs((dialPoint < 0) ? dialPoint-100 : dialPoint / 100);
+            
+            dialPoint %= 100;
+
+            //if (dialPoint > 99) {
+            //    zeroCount += dialPoint / 100;
+           // } else if (dialPoint < 0) {
+             //   zeroCount += Math.Abs(dialPoint / 100);
+            //}
+
+            return ((dialPoint < 0) ? 100 + dialPoint : dialPoint, zeroCount);
         }
 
         void part1() {
             string[] instructions = input.Split("\r\n");
             int dialPoint = 50;
             int password = 0;
+            int advPassword = 0;
+            int fullTurns;
 
             for (int i = 0; i < instructions.Length; i++) {
-                dialPoint = RotateDial(dialPoint, int.Parse(instructions[i][1..]), GetRotation(instructions[i]));
+                (dialPoint, fullTurns) = RotateDial(dialPoint, int.Parse(instructions[i][1..]), GetRotation(instructions[i]));
+
+                advPassword += fullTurns;
+
                 if (dialPoint == 0) {
                     password++;
-                }
-                //print(dialPoint);
+                }                
             }
 
-            print($"The password is {password}");
+            print($"The passwords are Part 1: {password} Part 2: {advPassword}");
         }
 
         void part2() {
-            
-
+            part1();
         }
 
 
