@@ -92,15 +92,18 @@ namespace CodeTAF
         bool IsInvalid2(ulong productID) {
             string ID = productID.ToString();
             int halfIndexPos = ID.Length / 2;
+            string pattern = @"^(\d+)\1+$"; //new, after original solve
 
-            for (int i = 1; i <= halfIndexPos; i++) {
+            //for (int i = 1; i <= halfIndexPos; i++) { //old way
                 //print($"{ID} Trying {ID[..i]}"); //remove before full testing
 
-                string pattern = @"^(?:" + ID[..i] + @"){2,}$";
-                if (Regex.IsMatch(ID, pattern)) {
-                    return true;
-                }
+                //string pattern = @"^(?:" + ID[..i] + @"){2,}$"; //old pattern that originally solved in ~48seconds
+                
+                
+            if (Regex.IsMatch(ID, pattern)) {
+                return true;
             }
+            //} //old way
 
             return false;            
         }
