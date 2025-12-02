@@ -87,7 +87,23 @@ namespace CodeTAF
             int halfIndexPos = ID.Length / 2;           
 
             return ID[..halfIndexPos] == ID[halfIndexPos..];
-        } 
+        }
+
+        bool IsInvalid2(ulong productID) {
+            string ID = productID.ToString();
+            int halfIndexPos = ID.Length / 2;
+
+            for (int i = 1; i <= halfIndexPos; i++) {
+                //print($"{ID} Trying {ID[..i]}"); //remove before full testing
+
+                string pattern = @"^(?:" + ID[..i] + @"){2,}$";
+                if (Regex.IsMatch(ID, pattern)) {
+                    return true;
+                }
+            }
+
+            return false;            
+        }
 
 
         void part1() {
@@ -110,7 +126,23 @@ namespace CodeTAF
         }
 
         void part2() {
-            
+            //print(IsInvalid2(44644677));            
+
+            ulong answer = 0;
+
+            foreach (Match range in Regex.Matches(input, @"(?<low>\d*)-(?<high>\d*)")) {
+
+                ulong startNum = ulong.Parse(range.Groups["low"].Value);
+                ulong endNum = ulong.Parse(range.Groups["high"].Value);
+
+                for (ulong i = startNum; i <= endNum; i++) {
+                    if (IsInvalid2(i)) {
+                        answer += i;
+                    }
+                }
+            }
+
+            print($"Part 2 answer: {answer}");
 
         }
 
