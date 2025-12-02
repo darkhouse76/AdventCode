@@ -14,6 +14,26 @@ namespace CodeTAF
             //Debug.Log(house);
         }
 
+        //Not Implemented
+        public static class Run {
+
+            //Not Implemented
+            public static void part(Action function, string codeName, bool useTestInput ) {
+                if (function == null || codeName == null) { return; }
+
+
+
+
+            }
+
+            //Not Implemented
+            public static void Test(Action bob) {
+                
+                bob();
+            }
+
+
+        }
 
         public static class Map {
 

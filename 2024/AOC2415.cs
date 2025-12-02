@@ -68,8 +68,11 @@ namespace CodeTAF
 
                 var startTime = System.DateTime.Now;
 
-                if (partTwo) { part2(); }
-                else { part1(); }
+                //if (partTwo) { part2(); }
+                //else { part1(); }
+
+                AocLib.Run.Test(part1);
+
                 print($"Took {System.DateTime.Now - startTime} to complete.");
             }
         }
@@ -79,8 +82,8 @@ namespace CodeTAF
         /////////////////////////////////////////////////////////////////
 
         void part1() {
-
-
+            print("BOB");
+            print(GetType().Name);
         }
 
         void part2() {
