@@ -1,0 +1,120 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+
+
+namespace CodeTAF
+{
+    public class AOC2501 : MonoBehaviour
+    {
+        [SerializeField]
+        private bool partTwo = false;
+        [SerializeField]
+        private bool useTestInput = true;
+        [SerializeField]
+        private bool run = false;
+        private string input;
+
+        private const string inputFolderName = "inputs";
+
+
+        string RootPath {
+            get {
+                var g = AssetDatabase.FindAssets($"t:Script {GetType().Name}");
+                return AssetDatabase.GUIDToAssetPath(g[0]);
+            }
+        }
+        string InputPath {
+            get {
+                return $"{RootPath[..^(GetType().Name.Length + 3)]}{inputFolderName}/";
+            }
+        }
+        string Day {
+            get {
+                return GetType().Name[^2..];
+            }
+        }
+        string TestInput {
+            get {
+                string filePath = $"{InputPath}{Day}test";
+                filePath = (File.Exists(filePath+"2.txt")) ? $"{filePath}2.txt" : $"{filePath}.txt";
+
+                if (!File.Exists(filePath)) {
+                    Debug.LogError($"NO input file found @ {filePath}");
+                    return null;
+                }
+                return File.ReadAllText(filePath);
+            }
+        }
+        string RealInput {
+            get {
+                string filePath = $"{InputPath}{Day}real.txt";
+
+                if (!File.Exists(filePath)) {
+                    Debug.LogError($"NO input file found @ {filePath}");
+                    return null;
+                }
+                return File.ReadAllText(filePath);
+            }
+        }
+
+        void Update() {
+            if (run) {
+                run = false;
+                Debug.Log("========================================================================");
+
+                input = useTestInput ? TestInput : RealInput;
+
+                var startTime = System.DateTime.Now;
+
+                if (partTwo) { part2(); }
+                else { part1(); }
+                print($"Took {System.DateTime.Now - startTime} to complete.");
+            }
+        }
+
+        /////////////////////////////////////////////////////////////////
+        /// Everything above is for unity and getting the input files ///
+        /////////////////////////////////////////////////////////////////
+
+        int GetRotation(string instruction) {
+
+            if (instruction.Substring(0,1) == "R") { return 1; }
+            return -1;
+        }
+
+        int RotateDial(int dialStartPoint, int ticks, int directionMod = 1) {
+            int dialPoint = dialStartPoint;
+
+            dialPoint = (dialPoint + (ticks * directionMod)) % 100;
+            
+            return (dialPoint < 0) ? 100 + dialPoint : dialPoint;
+        }
+
+        void part1() {
+            string[] instructions = input.Split("\r\n");
+            int dialPoint = 50;
+            int password = 0;
+
+            for (int i = 0; i < instructions.Length; i++) {
+                dialPoint = RotateDial(dialPoint, int.Parse(instructions[i].Substring(1)), GetRotation(instructions[i]));
+                if (dialPoint == 0) {
+                    password++;
+                }
+                //print(dialPoint);
+            }
+
+            print($"The password is {password}");
+        }
+
+        void part2() {
+            
+
+        }
+
+
+
+    }
+}
+
