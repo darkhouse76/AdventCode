@@ -80,7 +80,7 @@ namespace CodeTAF
 
         int GetRotation(string instruction) {
 
-            if (instruction.Substring(0,1) == "R") { return 1; }
+            if (instruction[..1] == "R") { return 1; }
             return -1;
         }
 
@@ -98,7 +98,7 @@ namespace CodeTAF
             int password = 0;
 
             for (int i = 0; i < instructions.Length; i++) {
-                dialPoint = RotateDial(dialPoint, int.Parse(instructions[i].Substring(1)), GetRotation(instructions[i]));
+                dialPoint = RotateDial(dialPoint, int.Parse(instructions[i][1..]), GetRotation(instructions[i]));
                 if (dialPoint == 0) {
                     password++;
                 }
